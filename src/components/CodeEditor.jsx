@@ -240,12 +240,12 @@ const CodeEditor = () => {
             className="button-icon"
             onClick={() => setShowConsole(!showConsole)}
           >
-            <Terminal size={16} />
+            <Terminal size={20} />
           </button>
         </div>
         <div className="toolbar-group">
           <button className="button-icon" onClick={() => setShowInfo(true)}>
-            <Info size={16} />
+            <Info size={20} />
           </button>
           <button
             className={`button ${
@@ -257,12 +257,10 @@ const CodeEditor = () => {
             {isRunning ? (
               <>
                 <Square size={16} />
-                <span>Stop</span>
               </>
             ) : (
               <>
                 <Play size={16} />
-                <span>Run</span>
               </>
             )}
           </button>

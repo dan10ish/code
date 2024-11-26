@@ -94,12 +94,6 @@ const EditorTools = ({ editor, language }) => {
     editor.getAction("editor.action.formatDocument")?.run();
   }, [editor]);
 
-  const handleReset = useCallback(() => {
-    editor.setValue(LANGUAGES[language]?.defaultCode || "");
-    editor.focus();
-    updateUndoRedoState();
-  }, [editor, language, updateUndoRedoState]);
-
   const handleDownload = useCallback(() => {
     const code = editor.getValue();
     const ext =
@@ -171,9 +165,6 @@ const EditorTools = ({ editor, language }) => {
         title="Format code"
       >
         <FileJson size={16} />
-      </button>
-      <button className="tool-button" onClick={handleReset} title="Reset code">
-        <RotateCcw size={16} />
       </button>
       <button
         className="tool-button"
