@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from "react";
-import { Play, Loader2, Terminal, X, Info } from "lucide-react";
+import React, { useState, useCallback, useRef } from "react";
+import { Play, Square, Loader2, Terminal, X, Info } from "lucide-react";
 import { compiler } from "../services/compiler";
 import EditorContainer from "./EditorContainer";
 
@@ -20,7 +20,6 @@ const LANGUAGES = {
 
 const InfoModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
-
   return (
     <div className="plot-modal" onClick={onClose}>
       <div className="plot-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -89,6 +88,7 @@ const CodeEditor = () => {
   const [language, setLanguage] = useState("python");
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [isStopping, setIsStopping] = useState(false);
   const [showConsole, setShowConsole] = useState(false);
   const [selectedPlot, setSelectedPlot] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
@@ -97,56 +97,102 @@ const CodeEditor = () => {
   const [inputPrompt, setInputPrompt] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [inputResolver, setInputResolver] = useState(null);
+  const abortControllerRef = useRef(null);
 
   const handleInput = async (prompt) => {
     if (language === "python") return "";
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+      if (abortControllerRef.current?.signal.aborted) {
+        reject(new Error("Execution stopped"));
+        return;
+      }
+
       setWaitingForInput(true);
       setInputPrompt(prompt || "Enter input:");
       setInputValue("");
       setInputResolver(() => (value) => {
+        if (abortControllerRef.current?.signal.aborted) {
+          reject(new Error("Execution stopped"));
+          return;
+        }
         setWaitingForInput(false);
         setInputPrompt("");
         setInputValue("");
         resolve(value);
       });
+
+      abortControllerRef.current?.signal.addEventListener("abort", () => {
+        setWaitingForInput(false);
+        setInputPrompt("");
+        setInputValue("");
+        reject(new Error("Execution stopped"));
+      });
     });
   };
 
   const submitInput = () => {
-    if (inputResolver) {
+    if (inputResolver && !isStopping) {
       inputResolver(inputValue);
       setInputResolver(null);
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter" && !e.shiftKey && waitingForInput) {
+    if (e.key === "Enter" && !e.shiftKey && waitingForInput && !isStopping) {
       e.preventDefault();
       submitInput();
     }
   };
 
+  const stopCode = async () => {
+    setIsStopping(true);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    if (inputResolver) {
+      setWaitingForInput(false);
+      setInputPrompt("");
+      setInputValue("");
+      setInputResolver(null);
+    }
+    setTimeout(() => {
+      setIsRunning(false);
+      setIsStopping(false);
+      setShowConsole(false);
+      setOutputBuffer([]);
+      setOutput(null);
+    }, 500);
+  };
+
   const runCode = useCallback(async () => {
     setIsRunning(true);
+    setIsStopping(false);
     setOutputBuffer([]);
     setOutput(null);
     setShowConsole(true);
+
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
     try {
       let result;
       switch (language) {
         case "python":
-          result = await compiler.runPython(code);
+          result = await compiler.runPython(code, signal);
           break;
         case "javascript":
-          result = await compiler.runJavaScript(code, handleInput);
+          result = await compiler.runJavaScript(code, handleInput, signal);
           break;
         case "cpp":
-          result = await compiler.runCPP(code, handleInput);
+          result = await compiler.runCPP(code, handleInput, signal);
           break;
         default:
           throw new Error(`Language ${language} not supported`);
       }
+
+      if (signal.aborted) return;
+
       if (result.output) {
         setOutputBuffer([
           { text: result.output, type: result.error ? "error" : "output" },
@@ -160,9 +206,13 @@ const CodeEditor = () => {
       }
       if (result.plot) setOutput(result);
     } catch (error) {
-      setOutputBuffer([{ text: error.message, type: "error" }]);
+      if (!signal.aborted) {
+        setOutputBuffer([{ text: error.message, type: "error" }]);
+      }
     } finally {
-      setIsRunning(false);
+      if (!signal.aborted) {
+        setIsRunning(false);
+      }
     }
   }, [code, language]);
 
@@ -198,16 +248,23 @@ const CodeEditor = () => {
             <Info size={16} />
           </button>
           <button
-            className="button button-primary"
-            onClick={runCode}
-            disabled={isRunning || waitingForInput}
+            className={`button ${
+              isRunning || isStopping ? "button-danger" : "button-primary"
+            }`}
+            onClick={isRunning ? stopCode : runCode}
+            disabled={isStopping}
           >
             {isRunning ? (
-              <Loader2 className="spinner" size={16} />
+              <>
+                <Square size={16} />
+                <span>Stop</span>
+              </>
             ) : (
-              <Play size={16} />
+              <>
+                <Play size={16} />
+                <span>Run</span>
+              </>
             )}
-            <span>{isRunning ? "Running..." : "Run"}</span>
           </button>
         </div>
       </div>
@@ -237,10 +294,12 @@ const CodeEditor = () => {
               </button>
             </div>
             <div className="console-content">
-              {isRunning && (
+              {(isRunning || isStopping) && (
                 <div className="console-loading">
-                  <Loader2 size={24} className="console-loading-icon" />
-                  <span>Running code...</span>
+                  <Loader2 className="spinner" size={24} />
+                  <span>
+                    {isStopping ? "Stopping code..." : "Running code..."}
+                  </span>
                 </div>
               )}
               {outputBuffer.map((item, index) => (
@@ -268,10 +327,12 @@ const CodeEditor = () => {
                     onKeyPress={handleKeyPress}
                     placeholder={inputPrompt}
                     autoFocus
+                    disabled={isStopping}
                   />
                   <button
                     className="console-input-button"
                     onClick={submitInput}
+                    disabled={isStopping}
                   >
                     Enter
                   </button>

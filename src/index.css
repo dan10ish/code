@@ -737,3 +737,72 @@ textarea {
   display: none !important;
   border: none !important;
 }
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.button-danger {
+  background-color: var(--error-color);
+  color: white;
+}
+
+.button-danger:hover {
+  background-color: #dc2626;
+}
+
+.success-icon {
+  color: var(--success-color);
+  animation: popIn 0.3s ease;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (hover: none) {
+  .success-icon {
+    animation: none;
+  }
+
+  .tool-button:active .success-icon {
+    animation: popIn 0.3s ease;
+  }
+}
+
+.console-input:disabled,
+.console-input-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.console-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: var(--space-24);
+  color: var(--text-secondary);
+}
+
+.button-danger:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
