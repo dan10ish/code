@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://code.danish.bio/sitemap.xml
+Host: https://code.danish.bio

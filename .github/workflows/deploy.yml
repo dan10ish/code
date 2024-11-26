@@ -1,0 +1,48 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Generate sitemap
+        run: |
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > dist/sitemap.xml
+          echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' >> dist/sitemap.xml
+          echo '  <url>' >> dist/sitemap.xml
+          echo '    <loc>https://code.danish.bio/</loc>' >> dist/sitemap.xml
+          echo '    <lastmod>'$(date +%Y-%m-%d)'</lastmod>' >> dist/sitemap.xml
+          echo '    <changefreq>weekly</changefreq>' >> dist/sitemap.xml
+          echo '    <priority>1.0</priority>' >> dist/sitemap.xml
+          echo '  </url>' >> dist/sitemap.xml
+          echo '</urlset>' >> dist/sitemap.xml
+
+      - name: Create CNAME
+        run: echo "code.danish.bio" > dist/CNAME
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: dist
+          clean: true
+
+permissions:
+  contents: write
