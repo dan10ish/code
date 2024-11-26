@@ -133,7 +133,7 @@ textarea {
 
 /* Language Select */
 .language-select {
-  width: 110px;
+  width: 125px;
   padding: var(--space-8) var(--space-12);
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
