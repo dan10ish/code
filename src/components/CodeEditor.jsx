@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
-import Editor from "@monaco-editor/react";
 import { Play, Loader2, Terminal, X, Info } from "lucide-react";
 import { compiler } from "../services/compiler";
+import EditorContainer from "./EditorContainer";
 
 const LANGUAGES = {
   python: {
@@ -29,7 +29,6 @@ const InfoModal = ({ isOpen, onClose }) => {
         </button>
         <div className="info-content">
           <h2 className="info-title">Code Editor Features</h2>
-
           <div className="info-section">
             <h3>Python</h3>
             <ul>
@@ -39,7 +38,6 @@ const InfoModal = ({ isOpen, onClose }) => {
               <li>Real-time output display</li>
             </ul>
           </div>
-
           <div className="info-section">
             <h3>JavaScript</h3>
             <ul>
@@ -48,7 +46,6 @@ const InfoModal = ({ isOpen, onClose }) => {
               <li>Async/await support</li>
             </ul>
           </div>
-
           <div className="info-section">
             <h3>C++</h3>
             <ul>
@@ -100,47 +97,6 @@ const CodeEditor = () => {
   const [inputPrompt, setInputPrompt] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [inputResolver, setInputResolver] = useState(null);
-
-  const handleEditorDidMount = (editor, monaco) => {
-    editor.updateOptions({
-      fontSize: 14,
-      fontFamily: "'Fira Code', Consolas, monospace",
-      fontLigatures: true,
-      minimap: { enabled: false },
-      scrollBeyondLastLine: false,
-      padding: { top: 16, bottom: 16 },
-      lineHeight: 24,
-      renderWhitespace: "selection",
-      bracketPairColorization: { enabled: true },
-      smoothScrolling: true,
-      cursorBlinking: "smooth",
-      cursorSmoothCaretAnimation: true,
-      wordWrap: "on",
-      showUnused: false,
-      quickSuggestions: false,
-      suggestOnTriggerCharacters: false,
-      acceptSuggestionOnEnter: "off",
-      tabCompletion: "off",
-      parameterHints: { enabled: false },
-      inlayHints: { enabled: false },
-      renderControlCharacters: false,
-      renderLineHighlight: "all",
-      hideCursorInOverviewRuler: true,
-      overviewRulerLanes: 0,
-      overviewRulerBorder: false,
-      mobileOptimizedSelection: true,
-    });
-
-    monaco.editor.defineTheme("custom-dark", {
-      base: "vs-dark",
-      inherit: true,
-      rules: [],
-      colors: {
-        "editorGhostText.foreground": "#00000000",
-      },
-    });
-    monaco.editor.setTheme("custom-dark");
-  };
 
   const handleInput = async (prompt) => {
     if (language === "python") return "";
@@ -258,14 +214,11 @@ const CodeEditor = () => {
 
       <div className={`editor-layout ${!showConsole ? "full" : ""}`}>
         <div className="editor-pane">
-          <Editor
-            height="100%"
+          <EditorContainer
+            code={code}
             language={language}
-            value={code}
             onChange={setCode}
-            onMount={handleEditorDidMount}
-            theme="custom-dark"
-            options={{ readOnly: isRunning }}
+            isRunning={isRunning}
           />
         </div>
 
