@@ -3,6 +3,42 @@ class CompilerService {
     this.pyodide = null;
     this.initialized = false;
     this.initializePromise = null;
+    this.supportedLibraries = {
+      // Core Libraries
+      numpy: [],
+      matplotlib: ["numpy"],
+      pandas: ["numpy"],
+      scipy: ["numpy"],
+
+      // Visualization Libraries
+      seaborn: ["numpy", "matplotlib", "pandas"],
+      plotly: ["numpy"],
+      bokeh: ["numpy"],
+      altair: ["numpy", "pandas"],
+
+      // Machine Learning
+      scikit_learn: ["numpy", "scipy"],
+      statsmodels: ["numpy", "pandas", "scipy"],
+
+      // Data Processing & Analysis
+      sympy: [],
+      networkx: ["numpy"],
+
+      // Statistics
+      pingouin: ["numpy", "pandas", "scipy"],
+
+      // Additional Plotting
+      vega: ["numpy"],
+      vega_datasets: [],
+
+      // Scientific Domain
+      astropy: ["numpy"],
+      biopython: ["numpy"],
+
+      // Image Processing
+      pillow: [],
+      imageio: ["numpy", "pillow"],
+    };
   }
 
   async ensurePyodide() {
@@ -81,6 +117,45 @@ class CompilerService {
     return this.initializePromise;
   }
 
+  async detectRequiredLibraries(code) {
+    const importPattern =
+      /\b(?:import|from)\s+([a-zA-Z0-9_]+)(?:\s+(?:import|as))?\b/g;
+    const libraries = new Set();
+    let match;
+
+    while ((match = importPattern.exec(code)) !== null) {
+      const lib = match[1];
+      if (this.supportedLibraries.hasOwnProperty(lib)) {
+        libraries.add(lib);
+        this.supportedLibraries[lib].forEach((dep) => libraries.add(dep));
+      }
+    }
+
+    return Array.from(libraries);
+  }
+
+  async loadRequiredLibraries(pyodide, libraries) {
+    const unsupportedLibs = [];
+    const loadedLibs = [];
+
+    for (const lib of libraries) {
+      if (!this.supportedLibraries.hasOwnProperty(lib)) {
+        unsupportedLibs.push(lib);
+        continue;
+      }
+
+      try {
+        await pyodide.loadPackage(lib);
+        loadedLibs.push(lib);
+      } catch (error) {
+        console.error(`Failed to load ${lib}:`, error);
+        unsupportedLibs.push(lib);
+      }
+    }
+
+    return { loadedLibs, unsupportedLibs };
+  }
+
   async runPython(code) {
     try {
       if (/input\s*\(/.test(code)) {
@@ -93,6 +168,22 @@ class CompilerService {
       }
 
       const pyodide = await this.ensurePyodide();
+
+      const requiredLibraries = await this.detectRequiredLibraries(code);
+      const { loadedLibs, unsupportedLibs } = await this.loadRequiredLibraries(
+        pyodide,
+        requiredLibraries
+      );
+
+      if (unsupportedLibs.length > 0) {
+        return {
+          output: "",
+          error: `The following libraries are not supported in this editor: ${unsupportedLibs.join(
+            ", "
+          )}`,
+          plot: null,
+        };
+      }
 
       await pyodide.runPythonAsync(`
         plt.close('all')
