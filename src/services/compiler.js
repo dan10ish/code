@@ -8,15 +8,11 @@ class CompilerService {
       numpy: [],
       matplotlib: ["numpy"],
       pandas: ["numpy"],
-      seaborn: ["numpy", "matplotlib", "pandas"],
-      scikit_learn: ["numpy", "scipy"],
       scipy: ["numpy"],
-      statsmodels: ["numpy", "pandas"],
+      plotly: ["numpy"],
+      scikit_learn: ["numpy", "scipy"],
       sympy: [],
       networkx: ["numpy"],
-      plotly: ["numpy"],
-      bokeh: ["numpy"],
-      altair: ["numpy", "pandas"],
     };
   }
 
@@ -69,12 +65,18 @@ class CompilerService {
       import base64
       plt.style.use('dark_background')
       matplotlib.rcParams.update({
-        'figure.facecolor':'#0a0a0a','axes.facecolor':'#0a0a0a',
-        'axes.edgecolor':'#404040','grid.color':'#404040',
-        'text.color':'#ffffff','axes.labelcolor':'#ffffff',
-        'xtick.color':'#ffffff','ytick.color':'#ffffff',
-        'axes.spines.top':True,'axes.spines.right':True,
-        'figure.figsize':[10,6],'font.size':10
+        'figure.facecolor':'#0a0a0a',
+        'axes.facecolor':'#0a0a0a',
+        'axes.edgecolor':'#404040',
+        'grid.color':'#404040',
+        'text.color':'#ffffff',
+        'axes.labelcolor':'#ffffff',
+        'xtick.color':'#ffffff',
+        'ytick.color':'#ffffff',
+        'axes.spines.top':True,
+        'axes.spines.right':True,
+        'figure.figsize':[10,6],
+        'font.size':10
       })
       class CaptureOutput:
         def __init__(self):
@@ -140,11 +142,7 @@ class CompilerService {
       const loadResult = await this.loadRequiredPackages(packages);
 
       if (loadResult.error)
-        return {
-          output: "",
-          error: loadResult.error,
-          plot: null,
-        };
+        return { output: "", error: loadResult.error, plot: null };
 
       await pyodide.runPythonAsync(`
         plt.close('all')
@@ -162,11 +160,7 @@ class CompilerService {
         plot: plots.length ? plots : null,
       };
     } catch (error) {
-      return {
-        output: "",
-        error: error.toString(),
-        plot: null,
-      };
+      return { output: "", error: error.toString(), plot: null };
     }
   }
 
@@ -177,8 +171,7 @@ class CompilerService {
         fig = plt.figure(fig_num)
         if fig.axes:
           buf = io.BytesIO()
-          fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', 
-                     facecolor='#0a0a0a', edgecolor='none')
+          fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', facecolor='#0a0a0a', edgecolor='none')
           buf.seek(0)
           plots.append('data:image/png;base64,' + base64.b64encode(buf.read()).decode('utf-8'))
           plt.close(fig)
@@ -255,10 +248,7 @@ class CompilerService {
         error: result.compiler_error || result.program_error || null,
       };
     } catch (error) {
-      return {
-        output: "",
-        error: "Compilation failed: " + error.message,
-      };
+      return { output: "", error: "Compilation failed: " + error.message };
     }
   }
 }

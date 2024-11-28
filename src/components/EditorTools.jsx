@@ -6,21 +6,22 @@ import {
   Redo,
   ZoomIn,
   ZoomOut,
-  RotateCcw,
   Check,
-  FileJson,
   Download,
 } from "lucide-react";
 
 const LANGUAGES = {
   python: {
-    defaultCode: `import numpy as np\nimport matplotlib.pyplot as plt\n\nx = np.linspace(0, 10, 100)\ny = np.sin(x)\n\nplt.figure(figsize=(8, 6))\nplt.plot(x, y, 'b-', label='sin(x)')\nplt.title('Sine Wave Plot')\nplt.xlabel('x')\nplt.ylabel('sin(x)')\nplt.grid(True)\nplt.legend()\nplt.show()`,
+    name: "Python",
+    defaultCode: `# Sample Code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nx = np.linspace(0, 10, 100)\ny = np.sin(x)\n\nplt.figure(figsize=(8, 6))\nplt.plot(x, y, 'b-', label='sin(x)')\nplt.title('Sine Wave Plot')\nplt.xlabel('x')\nplt.ylabel('sin(x)')\nplt.grid(True)\nplt.legend()\nplt.show()`,
   },
   javascript: {
-    defaultCode: `const name = await prompt("What's your name? ");\nconst age = await prompt("How old are you? ");\nconsole.log(\`Hello \${name}! You are \${age} years old.\`);`,
+    name: "JavaScript",
+    defaultCode: `// Sample Code\nconst name = await prompt("What's your name? ");\nconst age = await prompt("How old are you? ");\nconsole.log(\`Hello \${name}! You are \${age} years old.\`);`,
   },
   cpp: {
-    defaultCode: `#include <iostream>\n#include <string>\n\nint main() {\n    std::string name;\n    std::string age;\n    \n    std::cout << "What's your name? ";\n    std::cin >> name;\n    \n    std::cout << "How old are you? ";\n    std::cin >> age;\n    \n    std::cout << "Hello " << name << "! You are " << age << " years old.\\n";\n    return 0;\n}`,
+    name: "C++",
+    defaultCode: `// Sample Code\n#include <iostream>\n#include <string>\n\nint main() {\n    std::string name;\n    std::string age;\n    \n    std::cout << "What's your name? ";\n    std::cin >> name;\n    \n    std::cout << "How old are you? ";\n    std::cin >> age;\n    \n    std::cout << "Hello " << name << "! You are " << age << " years old.\\n";\n    return 0;\n}`,
   },
 };
 
@@ -90,10 +91,6 @@ const EditorTools = ({ editor, language }) => {
     updateUndoRedoState();
   }, [editor, canRedo, updateUndoRedoState]);
 
-  const handleFormat = useCallback(() => {
-    editor.getAction("editor.action.formatDocument")?.run();
-  }, [editor]);
-
   const handleDownload = useCallback(() => {
     const code = editor.getValue();
     const ext =
@@ -159,13 +156,6 @@ const EditorTools = ({ editor, language }) => {
         <ZoomIn size={16} />
       </button>
       <div className="tool-divider" />
-      <button
-        className="tool-button"
-        onClick={handleFormat}
-        title="Format code"
-      >
-        <FileJson size={16} />
-      </button>
       <button
         className="tool-button"
         onClick={handleDownload}

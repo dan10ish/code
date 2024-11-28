@@ -122,6 +122,9 @@ textarea {
   border-bottom: 1px solid var(--border-color);
   position: relative;
   z-index: 10;
+  position: sticky;
+  top: 0;
+  z-index: 101;
 }
 
 .toolbar-group {
@@ -275,11 +278,14 @@ textarea {
 /* Console Panel */
 .console-panel {
   position: fixed;
-  inset: 0;
+  top: 52px;
+  right: 0;
+  bottom: 0;
+  left: 0;
   background-color: var(--bg-secondary);
   display: flex;
   flex-direction: column;
-  z-index: 100;
+  z-index: 99;
   transform: translateX(100%);
   transition: transform 0.3s ease;
 }
@@ -392,6 +398,8 @@ textarea {
   border: 1px solid var(--border-color);
   touch-action: manipulation;
   transition: var(--transition-all);
+  position: relative;
+  margin-bottom: 48px;
 }
 
 .plot-container img {
@@ -399,6 +407,7 @@ textarea {
   height: auto;
   border-radius: var(--radius-md);
   display: block;
+  transition: var(--transition-all);
 }
 
 .plot-modal {
@@ -430,7 +439,7 @@ textarea {
   position: absolute;
   top: -44px;
   right: 0;
-  background: var(--bg-tertiary);
+  background-color: var(--error-color);
   border: none;
   color: var(--text-primary);
   width: 36px;
@@ -441,6 +450,20 @@ textarea {
   justify-content: center;
   touch-action: manipulation;
   transition: var(--transition-all);
+}
+
+.plot-actions {
+  position: absolute;
+  right: 0;
+  bottom: -40px;
+  display: flex;
+  gap: 8px;
+}
+
+.plot-modal .plot-actions {
+  position: absolute;
+  right: 16px;
+  bottom: -48px;
 }
 
 /* Info Modal */
@@ -468,22 +491,20 @@ textarea {
   color: var(--accent-primary);
 }
 
-.info-section ul {
-  list-style: none;
+.library-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
 }
 
-.info-section li {
-  margin-bottom: var(--space-8);
-  color: var(--text-secondary);
-  position: relative;
-  padding-left: var(--space-16);
-}
-
-.info-section li::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  color: var(--accent-primary);
+.library-item {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-family: "Fira Code", monospace;
+  font-size: 13px;
 }
 
 .info-footer {
@@ -531,18 +552,44 @@ textarea {
   padding: var(--space-8) var(--space-12);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   z-index: 100;
   box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center !important;
+  gap: 6px;
+  text-decoration: none;
 }
 
 .attribution a {
-  color: var(--text-primary);
   text-decoration: none;
 }
 
 .attribution-color {
   color: var(--accent-primary);
+}
+
+.attribution-icon {
+  color: var(--text-secondary);
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 18px;
+  width: auto;
+  display: flex;
+  align-items: center;
+  position: relative;
+  top: -1px;
+  cursor: pointer;
+}
+
+.button-close {
+  background-color: var(--error-color);
+  color: #ffffff;
+}
+
+.plot-actions button {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
 }
 
 /* Touch Device Optimizations */
@@ -618,6 +665,7 @@ textarea {
   .console-panel {
     position: relative;
     transform: none;
+    top: 0;
   }
 
   .language-select {
@@ -677,6 +725,14 @@ textarea {
     min-width: 20px;
     padding: 0 var(--space-4);
   }
+
+  .plot-actions {
+    bottom: -46px;
+  }
+
+  .plot-modal .plot-actions {
+    bottom: -52px;
+  }
 }
 
 /* Hover States - Desktop Only */
@@ -711,7 +767,7 @@ textarea {
     background-color: #dc2626;
   }
 
-  .plot-container:hover {
+  .plot-container img:hover {
     transform: scale(1.01);
     box-shadow: var(--shadow-sm);
   }
@@ -725,11 +781,22 @@ textarea {
   }
 
   .plot-modal-close:hover {
-    background-color: var(--border-color);
     transform: scale(1.1);
   }
 
   ::-webkit-scrollbar-thumb:hover {
     background: var(--text-muted);
+  }
+
+  .attribution-icon:hover {
+    color: var(--accent-primary);
+  }
+
+  .button-close:hover {
+    transform: scale(1.1);
+  }
+
+  .plot-actions button:hover {
+    transform: scale(1.05);
   }
 }
