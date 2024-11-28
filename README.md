@@ -11,24 +11,37 @@ Play around with it [here](https://code.danish.bio).
 
 ### Multi-Language Support
 
-- 🐍 **Python**
+- 🐍 **Python (≥ 3.9)**
 
   - Matplotlib integration for data visualization
   - NumPy for numerical computations
   - Real-time output display
   - Dark-themed plots
+  - **Supported Libraries:**
+    - numpy
+    - matplotlib
+    - pandas
+    - scipy
+    - plotly
+    - scikit_learn
+    - sympy
+    - networkx
 
-- 📜 **JavaScript**
+- 📜 **JavaScript (≥ ES2017)**
 
   - Interactive input via `prompt()`
   - Console output capture
   - Async/await support
+  - Modern APIs
+  - Promises
   - Real-time execution
 
-- ⚡ **C++**
-  - C++17 support
+- ⚡ **C++ (≥ C++17)**
+  - Standard Template Library (STL)
   - Standard I/O streams
   - Interactive input via `std::cin`
+  - File streams support
+  - Modern language features
   - Remote compilation
 
 ### Editor Features
