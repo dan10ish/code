@@ -3,41 +3,20 @@ class CompilerService {
     this.pyodide = null;
     this.initialized = false;
     this.initializePromise = null;
-    this.supportedLibraries = {
-      // Core Libraries
+    this.loadedPackages = new Set();
+    this.packageDeps = {
       numpy: [],
       matplotlib: ["numpy"],
       pandas: ["numpy"],
-      scipy: ["numpy"],
-
-      // Visualization Libraries
       seaborn: ["numpy", "matplotlib", "pandas"],
+      scikit_learn: ["numpy", "scipy"],
+      scipy: ["numpy"],
+      statsmodels: ["numpy", "pandas"],
+      sympy: [],
+      networkx: ["numpy"],
       plotly: ["numpy"],
       bokeh: ["numpy"],
       altair: ["numpy", "pandas"],
-
-      // Machine Learning
-      scikit_learn: ["numpy", "scipy"],
-      statsmodels: ["numpy", "pandas", "scipy"],
-
-      // Data Processing & Analysis
-      sympy: [],
-      networkx: ["numpy"],
-
-      // Statistics
-      pingouin: ["numpy", "pandas", "scipy"],
-
-      // Additional Plotting
-      vega: ["numpy"],
-      vega_datasets: [],
-
-      // Scientific Domain
-      astropy: ["numpy"],
-      biopython: ["numpy"],
-
-      // Image Processing
-      pillow: [],
-      imageio: ["numpy", "pillow"],
     };
   }
 
@@ -46,144 +25,126 @@ class CompilerService {
     if (this.initializePromise) return this.initializePromise;
 
     this.initializePromise = (async () => {
-      try {
-        if (!document.querySelector('script[src*="pyodide.js"]')) {
-          await new Promise((resolve, reject) => {
-            const script = document.createElement("script");
-            script.src =
-              "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js";
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-          });
-        }
-
-        if (!window.loadPyodide)
-          throw new Error("Pyodide failed to load properly");
-
-        this.pyodide = await window.loadPyodide({
-          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
+      if (!document.querySelector('script[src*="pyodide.js"]')) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src =
+            "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js";
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
         });
-
-        await this.pyodide.loadPackage(["numpy", "matplotlib"]);
-
-        await this.pyodide.runPythonAsync(`
-          import matplotlib
-          matplotlib.use('Agg')
-          import matplotlib.pyplot as plt
-          import numpy as np
-          import sys
-          import io
-          import base64
-
-          plt.style.use('dark_background')
-          matplotlib.rcParams.update({
-              'figure.facecolor': '#0a0a0a',
-              'axes.facecolor': '#0a0a0a',
-              'axes.edgecolor': '#404040',
-              'grid.color': '#404040',
-              'text.color': '#ffffff',
-              'axes.labelcolor': '#ffffff',
-              'xtick.color': '#ffffff',
-              'ytick.color': '#ffffff',
-              'axes.spines.top': True,
-              'axes.spines.right': True,
-              'figure.figsize': [10, 6],
-              'font.size': 10
-          })
-
-          class CaptureOutput:
-              def __init__(self):
-                  self.content = []
-              def write(self, text):
-                  self.content.append(text)
-              def flush(self):
-                  pass
-              def getvalue(self):
-                  return ''.join(self.content)
-
-          sys.stdout = CaptureOutput()
-          sys.stderr = CaptureOutput()
-        `);
-
-        this.initialized = true;
-        return this.pyodide;
-      } catch (error) {
-        this.initializePromise = null;
-        throw error;
       }
+
+      if (!window.loadPyodide) throw new Error("Pyodide failed to load");
+
+      this.pyodide = await window.loadPyodide({
+        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
+      });
+
+      await this.loadCorePackages();
+      await this.setupPythonEnvironment();
+
+      this.initialized = true;
+      return this.pyodide;
     })();
 
     return this.initializePromise;
   }
 
-  async detectRequiredLibraries(code) {
-    const importPattern =
-      /\b(?:import|from)\s+([a-zA-Z0-9_]+)(?:\s+(?:import|as))?\b/g;
-    const libraries = new Set();
-    let match;
-
-    while ((match = importPattern.exec(code)) !== null) {
-      const lib = match[1];
-      if (this.supportedLibraries.hasOwnProperty(lib)) {
-        libraries.add(lib);
-        this.supportedLibraries[lib].forEach((dep) => libraries.add(dep));
-      }
-    }
-
-    return Array.from(libraries);
+  async loadCorePackages() {
+    await this.pyodide.loadPackage(["numpy", "matplotlib"]);
+    this.loadedPackages.add("numpy");
+    this.loadedPackages.add("matplotlib");
   }
 
-  async loadRequiredLibraries(pyodide, libraries) {
-    const unsupportedLibs = [];
-    const loadedLibs = [];
+  async setupPythonEnvironment() {
+    await this.pyodide.runPythonAsync(`
+      import matplotlib
+      matplotlib.use('Agg')
+      import matplotlib.pyplot as plt
+      import numpy as np
+      import sys
+      import io
+      import base64
+      plt.style.use('dark_background')
+      matplotlib.rcParams.update({
+        'figure.facecolor':'#0a0a0a','axes.facecolor':'#0a0a0a',
+        'axes.edgecolor':'#404040','grid.color':'#404040',
+        'text.color':'#ffffff','axes.labelcolor':'#ffffff',
+        'xtick.color':'#ffffff','ytick.color':'#ffffff',
+        'axes.spines.top':True,'axes.spines.right':True,
+        'figure.figsize':[10,6],'font.size':10
+      })
+      class CaptureOutput:
+        def __init__(self):
+          self.content = []
+        def write(self, text):
+          self.content.append(text)
+        def flush(self):
+          pass
+        def getvalue(self):
+          return ''.join(self.content)
+      sys.stdout = CaptureOutput()
+      sys.stderr = CaptureOutput()
+    `);
+  }
 
-    for (const lib of libraries) {
-      if (!this.supportedLibraries.hasOwnProperty(lib)) {
-        unsupportedLibs.push(lib);
-        continue;
-      }
+  async loadRequiredPackages(packages) {
+    const toLoad = new Set();
+    const stack = [...packages];
 
-      try {
-        await pyodide.loadPackage(lib);
-        loadedLibs.push(lib);
-      } catch (error) {
-        console.error(`Failed to load ${lib}:`, error);
-        unsupportedLibs.push(lib);
+    while (stack.length) {
+      const pkg = stack.pop();
+      if (!this.loadedPackages.has(pkg) && this.packageDeps[pkg]) {
+        toLoad.add(pkg);
+        stack.push(...this.packageDeps[pkg]);
       }
     }
 
-    return { loadedLibs, unsupportedLibs };
+    if (toLoad.size) {
+      try {
+        await this.pyodide.loadPackage([...toLoad]);
+        toLoad.forEach((pkg) => this.loadedPackages.add(pkg));
+      } catch (error) {
+        return { error: `Failed to load packages: ${error.message}` };
+      }
+    }
+    return { success: true };
+  }
+
+  async detectRequiredPackages(code) {
+    const imports =
+      code.match(/(?:from|import)\s+([a-zA-Z0-9_]+)(?:\s+(?:import|as))?\b/g) ||
+      [];
+    return [
+      ...new Set(
+        imports
+          .map((imp) => imp.split(/\s+/)[1].split(".")[0])
+          .filter((pkg) => this.packageDeps.hasOwnProperty(pkg))
+      ),
+    ];
   }
 
   async runPython(code) {
     try {
-      if (/input\s*\(/.test(code)) {
+      if (/input\s*\(/.test(code))
         return {
-          output:
-            "This website does not support Python input. Try JavaScript or C++.",
+          output: "Input not supported in Python. Use JavaScript or C++.",
           error: "Input not supported",
           plot: null,
         };
-      }
 
       const pyodide = await this.ensurePyodide();
+      const packages = await this.detectRequiredPackages(code);
+      const loadResult = await this.loadRequiredPackages(packages);
 
-      const requiredLibraries = await this.detectRequiredLibraries(code);
-      const { loadedLibs, unsupportedLibs } = await this.loadRequiredLibraries(
-        pyodide,
-        requiredLibraries
-      );
-
-      if (unsupportedLibs.length > 0) {
+      if (loadResult.error)
         return {
           output: "",
-          error: `The following libraries are not supported in this editor: ${unsupportedLibs.join(
-            ", "
-          )}`,
+          error: loadResult.error,
           plot: null,
         };
-      }
 
       await pyodide.runPythonAsync(`
         plt.close('all')
@@ -192,36 +153,13 @@ class CompilerService {
       `);
 
       await pyodide.runPythonAsync(code);
-
       const output = await pyodide.runPythonAsync("sys.stdout.getvalue()");
-
-      const plotData = await pyodide.runPythonAsync(`
-        def capture_plots():
-            plots = []
-            fig_nums = plt.get_fignums()
-            
-            for fig_num in fig_nums:
-                fig = plt.figure(fig_num)
-                if len(fig.axes) > 0:
-                    buf = io.BytesIO()
-                    fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', 
-                              facecolor='#0a0a0a', edgecolor='none')
-                    buf.seek(0)
-                    plot_base64 = base64.b64encode(buf.read()).decode('utf-8')
-                    plots.append(plot_base64)
-                plt.close(fig)
-            return plots
-
-        capture_plots()
-      `);
+      const plots = await this.capturePlots(pyodide);
 
       return {
         output: output.trim(),
         error: null,
-        plot:
-          plotData && plotData.length > 0
-            ? plotData.map((plot) => `data:image/png;base64,${plot}`)
-            : null,
+        plot: plots.length ? plots : null,
       };
     } catch (error) {
       return {
@@ -232,58 +170,57 @@ class CompilerService {
     }
   }
 
+  async capturePlots(pyodide) {
+    return await pyodide.runPythonAsync(`
+      plots = []
+      for fig_num in plt.get_fignums():
+        fig = plt.figure(fig_num)
+        if fig.axes:
+          buf = io.BytesIO()
+          fig.savefig(buf, format='png', dpi=100, bbox_inches='tight', 
+                     facecolor='#0a0a0a', edgecolor='none')
+          buf.seek(0)
+          plots.append('data:image/png;base64,' + base64.b64encode(buf.read()).decode('utf-8'))
+          plt.close(fig)
+      plots
+    `);
+  }
+
   async runJavaScript(code, handleInput) {
     try {
-      let output = "";
-      let error = "";
-
+      let output = "",
+        error = "";
       const sandbox = {
         console: {
-          log: (...args) => {
-            output +=
+          log: (...args) =>
+            (output +=
               args
                 .map((arg) =>
                   typeof arg === "object" ? JSON.stringify(arg) : String(arg)
                 )
-                .join(" ") + "\n";
-          },
-          error: (...args) => {
-            error +=
+                .join(" ") + "\n"),
+          error: (...args) =>
+            (error +=
               args
                 .map((arg) =>
                   typeof arg === "object" ? JSON.stringify(arg) : String(arg)
                 )
-                .join(" ") + "\n";
-          },
-          warn: (...args) => {
-            output += "Warning: " + args.join(" ") + "\n";
-          },
+                .join(" ") + "\n"),
+          warn: (...args) => (output += "Warning: " + args.join(" ") + "\n"),
         },
-        prompt: async (text) => {
-          const value = await handleInput(text || "");
-          return value;
-        },
-        alert: (msg) => {
-          output += "Alert: " + msg + "\n";
-        },
+        prompt: async (text) => await handleInput(text || ""),
+        alert: (msg) => (output += "Alert: " + msg + "\n"),
       };
 
       const fn = new Function(
         ...Object.keys(sandbox),
-        `async function __run() {\n${code}\n}\n__run();`
+        `async function __run() {${code}}\n__run();`
       );
-
       await fn(...Object.values(sandbox));
 
-      return {
-        output,
-        error: error || null,
-      };
+      return { output, error: error || null };
     } catch (error) {
-      return {
-        output: "",
-        error: error.message,
-      };
+      return { output: "", error: error.message };
     }
   }
 
@@ -301,9 +238,7 @@ class CompilerService {
 
       const response = await fetch("https://wandbox.org/api/compile.json", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code,
           compiler: "gcc-head",
@@ -312,8 +247,7 @@ class CompilerService {
         }),
       });
 
-      if (!response.ok) throw new Error("Compilation API request failed");
-
+      if (!response.ok) throw new Error("Compilation failed");
       const result = await response.json();
 
       return {
@@ -323,7 +257,7 @@ class CompilerService {
     } catch (error) {
       return {
         output: "",
-        error: "Failed to compile C++ code: " + error.message,
+        error: "Compilation failed: " + error.message,
       };
     }
   }
