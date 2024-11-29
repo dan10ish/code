@@ -5,31 +5,47 @@ import {
   Loader2,
   Terminal,
   X,
-  Info,
   Download,
   Github,
 } from "lucide-react";
 import { compiler } from "../services/compiler";
 import EditorContainer from "./EditorContainer";
 
+const InfoIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    width="40"
+    height="40"
+    style={{ transform: "scale(0.6)", margin: "-10px" }}
+    fill="none"
+    stroke="currentColor"
+  >
+    <path
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 16v-4m0-4h.01M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10z"
+    />
+  </svg>
+);
+
 const LANGUAGES = {
   python: {
     name: "Python",
-    defaultCode: `# Sample Code\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nx = np.linspace(0, 10, 100)\ny = np.sin(x)\n\nplt.figure(figsize=(8, 6))\nplt.plot(x, y, 'b-', label='sin(x)')\nplt.title('Sine Wave Plot')\nplt.xlabel('x')\nplt.ylabel('sin(x)')\nplt.grid(True)\nplt.legend()\nplt.show()`,
+    defaultCode: `import numpy as np\nimport matplotlib.pyplot as plt\n\nx = np.linspace(0, 10, 100)\ny = np.sin(x)\n\nplt.figure(figsize=(8, 6))\nplt.plot(x, y, 'b-', label='sin(x)')\nplt.title('Sine Wave Plot')\nplt.xlabel('x')\nplt.ylabel('sin(x)')\nplt.grid(True)\nplt.legend()\nplt.show()`,
   },
   javascript: {
     name: "JavaScript",
-    defaultCode: `// Sample Code\nconst name = await prompt("What's your name? ");\nconst age = await prompt("How old are you? ");\nconsole.log(\`Hello \${name}! You are \${age} years old.\`);`,
+    defaultCode: `const name = await prompt("What's your name? ");\nconst age = await prompt("How old are you? ");\nconsole.log(\`Hello \${name}! You are \${age} years old.\`);`,
   },
   cpp: {
     name: "C++",
-    defaultCode: `// Sample Code\n#include <iostream>\n#include <string>\n\nint main() {\n    std::string name;\n    std::string age;\n    \n    std::cout << "What's your name? ";\n    std::cin >> name;\n    \n    std::cout << "How old are you? ";\n    std::cin >> age;\n    \n    std::cout << "Hello " << name << "! You are " << age << " years old.\\n";\n    return 0;\n}`,
+    defaultCode: `#include <iostream>\n#include <string>\n\nint main() {\n    std::string name;\n    std::string age;\n    \n    std::cout << "What's your name? ";\n    std::cin >> name;\n    \n    std::cout << "How old are you? ";\n    std::cin >> age;\n    \n    std::cout << "Hello " << name << "! You are " << age << " years old.\\n";\n    return 0;\n}`,
   },
 };
 
-const InfoModal = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
-  return (
+const InfoModal = ({ isOpen, onClose }) =>
+  !isOpen ? null : (
     <div className="plot-modal" onClick={onClose}>
       <div className="plot-modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="plot-modal-close modal-close" onClick={onClose}>
@@ -37,45 +53,56 @@ const InfoModal = ({ isOpen, onClose }) => {
         </button>
         <div className="info-content">
           <h2 className="info-title">Supported Features</h2>
-
           <div className="info-section">
             <h3>Python (≥ 3.9)</h3>
             <div className="library-list">
-              <span className="library-item">numpy</span>
-              <span className="library-item">matplotlib</span>
-              <span className="library-item">pandas</span>
-              <span className="library-item">scipy</span>
-              <span className="library-item">plotly</span>
-              <span className="library-item">scikit_learn</span>
-              <span className="library-item">sympy</span>
-              <span className="library-item">networkx</span>
+              {[
+                "numpy",
+                "matplotlib",
+                "pandas",
+                "scipy",
+                "plotly",
+                "scikit_learn",
+                "sympy",
+                "networkx",
+              ].map((lib) => (
+                <span key={lib} className="library-item">
+                  {lib}
+                </span>
+              ))}
             </div>
           </div>
-
           <div className="info-section">
             <h3>JavaScript (≥ ES2017)</h3>
             <div className="library-list">
-              <span className="library-item">async/await</span>
-              <span className="library-item">interactive input</span>
-              <span className="library-item">promises</span>
-              <span className="library-item">modern APIs</span>
+              {[
+                "async/await",
+                "interactive input",
+                "promises",
+                "modern APIs",
+              ].map((feature) => (
+                <span key={feature} className="library-item">
+                  {feature}
+                </span>
+              ))}
             </div>
           </div>
-
           <div className="info-section">
             <h3>C++ (≥ C++17)</h3>
             <div className="library-list">
-              <span className="library-item">STL</span>
-              <span className="library-item">user input</span>
-              <span className="library-item">file streams</span>
-              <span className="library-item">modern features</span>
+              {["STL", "user input", "file streams", "modern features"].map(
+                (feature) => (
+                  <span key={feature} className="library-item">
+                    {feature}
+                  </span>
+                )
+              )}
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-};
 
 const Attribution = () => (
   <div className="attribution">
@@ -89,21 +116,11 @@ const Attribution = () => (
         <span className="attribution-color">Danish</span>
       </a>
     </div>
-    <div>
-      <a
-        href="https://github.com/dan10ish/code"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="attribution-icon"
-      >
-        <Github size={15} />
-      </a>
-    </div>
   </div>
 );
 
 const PlotModal = ({ src, onClose }) =>
-  src && (
+  !src ? null : (
     <div className="plot-modal" onClick={onClose}>
       <div className="plot-modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="plot-modal-close modal-close" onClick={onClose}>
@@ -151,7 +168,6 @@ const CodeEditor = () => {
         reject(new Error("Execution stopped"));
         return;
       }
-
       setWaitingForInput(true);
       setInputPrompt(prompt || "Enter input:");
       setInputValue("");
@@ -165,7 +181,6 @@ const CodeEditor = () => {
         setInputValue("");
         resolve(value);
       });
-
       abortControllerRef.current?.signal.addEventListener("abort", () => {
         setWaitingForInput(false);
         setInputPrompt("");
@@ -289,8 +304,16 @@ const CodeEditor = () => {
           </button>
         </div>
         <div className="toolbar-group">
+          <a
+            href="https://github.com/dan10ish/code"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="button-icon"
+          >
+            <Github size={20} />
+          </a>
           <button className="button-icon" onClick={() => setShowInfo(true)}>
-            <Info size={20} />
+            <InfoIcon />
           </button>
           <button
             className={`button ${
