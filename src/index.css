@@ -1,16 +1,33 @@
-/* Variables */
 :root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #111111;
-  --bg-tertiary: #2a2a2a;
-  --border-color: #2a2a2a;
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-  --text-muted: #6e6e6e;
-  --accent-primary: #3b82f6;
-  --accent-hover: #2563eb;
-  --success-color: #22c55e;
-  --error-color: #ef4444;
+  --base03: #002b36;
+  --base02: #002b36;
+  --base01: #586e75;
+  --base00: #657b83;
+  --base0: #839496;
+  --base1: #93a1a1;
+  --base2: #eee8d5;
+  --base3: #fdf6e3;
+  --yellow: #b58900;
+  --orange: #cb4b16;
+  --red: #dc322f;
+  --magenta: #d33682;
+  --violet: #6c71c4;
+  --blue: #268bd2;
+  --cyan: #2aa198;
+  --green: #859900;
+
+  --bg-primary: var(--base03);
+  --bg-secondary: var(--base02);
+  --bg-tertiary: #073642cc;
+  --border-color: #033643;
+  --text-primary: var(--base1);
+  --text-secondary: var(--base0);
+  --text-muted: var(--base00);
+  --accent-primary: var(--blue);
+  --accent-hover: var(--violet);
+  --success-color: var(--green);
+  --error-color: var(--red);
+
   --space-2: 0.125rem;
   --space-4: 0.25rem;
   --space-6: 0.375rem;
@@ -29,7 +46,6 @@
   --transition-all: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Base Reset */
 * {
   margin: 0;
   padding: 0;
@@ -51,7 +67,7 @@ body,
 }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: "Fira Code", monospace;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
@@ -62,17 +78,15 @@ input,
 button,
 select,
 textarea {
-  font-family: inherit;
+  font-family: "Fira Code", monospace;
   font-size: 16px;
   background-color: transparent;
   border: none;
   color: inherit;
   -webkit-appearance: none;
   appearance: none;
-  cursor: pointer;
 }
 
-/* Scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -83,7 +97,6 @@ textarea {
   border-radius: var(--radius-sm);
 }
 
-/* Editor Base */
 .editor-container {
   height: 100%;
   display: flex;
@@ -111,7 +124,6 @@ textarea {
   width: 100%;
 }
 
-/* Toolbar */
 .toolbar {
   display: flex;
   align-items: center;
@@ -120,8 +132,6 @@ textarea {
   padding: var(--space-8) var(--space-16);
   background-color: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
-  position: relative;
-  z-index: 10;
   position: sticky;
   top: 0;
   z-index: 101;
@@ -134,22 +144,19 @@ textarea {
   flex-shrink: 0;
 }
 
-/* Language Select */
 .language-select {
-  width: 125px;
+  width: 130px;
   padding: var(--space-8) var(--space-12);
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
+  font-size: 14px;
   background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%2393a1a1' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right var(--space-8) center;
   padding-right: var(--space-24);
 }
-
-/* Editor Tools */
 
 .editor-tools {
   display: flex;
@@ -199,7 +206,6 @@ textarea {
   pointer-events: none;
 }
 
-/* Buttons */
 .button {
   display: inline-flex;
   align-items: center;
@@ -211,19 +217,17 @@ textarea {
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
   border: 1px solid transparent;
-  touch-action: manipulation;
   transition: var(--transition-all);
-  cursor: pointer;
 }
 
 .button-primary {
   background-color: var(--accent-primary);
-  color: white;
+  color: var(--base2);
 }
 
 .button-danger {
   background-color: var(--error-color);
-  color: white;
+  color: var(--base2);
 }
 
 .button:disabled,
@@ -247,7 +251,6 @@ textarea {
   transition: var(--transition-all);
 }
 
-/* Success States */
 .success-icon {
   color: var(--success-color);
   animation: popIn 0.3s ease;
@@ -275,7 +278,6 @@ textarea {
   animation: spin 1s linear infinite;
 }
 
-/* Console Panel */
 .console-panel {
   position: fixed;
   top: 52px;
@@ -318,24 +320,25 @@ textarea {
   padding: var(--space-16);
   font-size: var(--font-size-base);
   -webkit-overflow-scrolling: touch;
+  background-color: var(--bg-secondary);
 }
 
 .output-text {
   white-space: pre-wrap;
   word-wrap: break-word;
-  font-family: "Fira Code", Consolas, monospace;
+  font-family: "Fira Code", monospace;
   margin-bottom: var(--space-8);
+  color: var(--text-primary);
 }
 
 .error-text {
   color: var(--error-color);
   white-space: pre-wrap;
   word-wrap: break-word;
-  font-family: "Fira Code", Consolas, monospace;
+  font-family: "Fira Code", monospace;
   margin-bottom: var(--space-8);
 }
 
-/* Console Input */
 .console-input-container {
   display: flex;
   gap: var(--space-8);
@@ -375,14 +378,12 @@ textarea {
   justify-content: center;
   padding: var(--space-8) var(--space-16);
   background-color: var(--accent-primary);
-  color: white;
+  color: var(--base2);
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
   min-height: 44px;
   min-width: 80px;
-  touch-action: manipulation;
   transition: var(--transition-all);
-  cursor: pointer;
 }
 
 .console-input-button:disabled {
@@ -390,17 +391,14 @@ textarea {
   pointer-events: none;
 }
 
-/* Plot Styles */
 .plot-container {
   background-color: var(--bg-primary);
   border-radius: var(--radius-lg);
   padding: var(--space-8);
-  margin: var(--space-16) 0;
+  margin: var(--space-16) 0 48px 0;
   border: 1px solid var(--border-color);
-  touch-action: manipulation;
   transition: var(--transition-all);
   position: relative;
-  margin-bottom: 48px;
 }
 
 .plot-container img {
@@ -414,7 +412,7 @@ textarea {
 .plot-modal {
   position: fixed;
   inset: 0;
-  background-color: rgba(17, 17, 17, 0.9);
+  background-color: rgba(0, 43, 54, 0.9);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -442,14 +440,13 @@ textarea {
   right: 0;
   background-color: var(--error-color);
   border: none;
-  color: var(--text-primary);
+  color: var(--base2);
   width: 36px;
   height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  touch-action: manipulation;
   transition: var(--transition-all);
 }
 
@@ -467,7 +464,6 @@ textarea {
   bottom: -48px;
 }
 
-/* Info Modal */
 .info-content {
   color: var(--text-primary);
   max-width: 90vw;
@@ -515,7 +511,6 @@ textarea {
   text-align: center;
 }
 
-/* Loading States */
 .console-loading {
   display: flex;
   align-items: center;
@@ -525,7 +520,6 @@ textarea {
   color: var(--text-secondary);
 }
 
-/* Monaco Editor Overrides */
 .monaco-editor .suggest-widget,
 .monaco-editor .suggest-details,
 .monaco-editor .parameter-hints-widget,
@@ -544,7 +538,6 @@ textarea {
   -webkit-text-size-adjust: none !important;
 }
 
-/* Attribution */
 .attribution {
   position: fixed;
   bottom: var(--space-8);
@@ -580,12 +573,11 @@ textarea {
   align-items: center;
   position: relative;
   top: -1px;
-  cursor: pointer;
 }
 
 .button-close {
   background-color: var(--error-color);
-  color: #ffffff;
+  color: var(--base2);
 }
 
 .plot-actions button {
@@ -593,62 +585,6 @@ textarea {
   color: var(--text-secondary);
 }
 
-/* Touch Device Optimizations */
-@media (hover: none) {
-  .tool-button {
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .tool-tooltip {
-    display: none !important;
-  }
-
-  .success-icon {
-    animation: none;
-  }
-
-  input[type="text"],
-  textarea,
-  [contenteditable] {
-    -webkit-user-select: text;
-    user-select: text;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  .monaco-editor,
-  .monaco-editor .overflow-guard {
-    -webkit-user-select: text;
-    user-select: text;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  .monaco-editor textarea,
-  .monaco-editor .inputarea {
-    opacity: 1 !important;
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    background: transparent !important;
-    -webkit-user-select: text !important;
-    user-select: text !important;
-  }
-
-  .monaco-editor * {
-    -webkit-user-modify: read-write-plaintext-only;
-  }
-
-  .tool-button:active {
-    background-color: var(--border-color);
-    transform: scale(0.95);
-  }
-
-  .tool-button:active .success-icon {
-    animation: popIn 0.3s ease;
-  }
-}
-
-/* Desktop Styles */
 @media (min-width: 768px) {
   .toolbar {
     padding: var(--space-12) var(--space-16);
@@ -736,16 +672,14 @@ textarea {
   }
 }
 
-/* Hover States - Desktop Only */
 @media (hover: hover) and (pointer: fine) {
   .tool-button:hover {
     background-color: var(--bg-tertiary);
     color: var(--text-primary);
-    cursor: pointer;
   }
 
   .language-select:hover {
-    cursor: pointer;
+    border-color: var(--cyan);
   }
 
   .tool-button:hover .tool-tooltip {
@@ -754,18 +688,12 @@ textarea {
     top: 44px;
   }
 
-  .button:hover {
-    transform: translateY(-1px);
-    cursor: pointer;
-  }
-
   .button-primary:hover {
-    background-color: var(--accent-hover);
-    cursor: pointer;
+    transform: scale(1.05);
   }
 
   .button-danger:hover {
-    background-color: #dc2626;
+    transform: scale(1.05);
   }
 
   .plot-container img:hover {
@@ -774,6 +702,7 @@ textarea {
   }
 
   .attribution-color:hover {
+    color: var(--cyan);
     text-decoration: underline;
   }
 
@@ -799,5 +728,49 @@ textarea {
 
   .plot-actions button:hover {
     transform: scale(1.05);
+    background-color: var(--bg-secondary);
+  }
+
+  .language-select,
+  .tool-button,
+  .button,
+  .button-icon,
+  .button-primary,
+  .button-danger,
+  .console-input-button,
+  .plot-modal-close,
+  .plot-actions button,
+  .plot-container img,
+  .attribution,
+  .attribution a,
+  .attribution-icon,
+  input[type="submit"],
+  input[type="button"],
+  select,
+  button,
+  a {
+    cursor: pointer;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  textarea,
+  .console-input {
+    cursor: text;
+  }
+
+  .button:disabled,
+  .button-primary:disabled,
+  .button-danger:disabled,
+  .tool-button:disabled,
+  .console-input-button:disabled,
+  .console-input:disabled,
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  .plot-modal,
+  .plot-modal-content {
+    cursor: default;
   }
 }

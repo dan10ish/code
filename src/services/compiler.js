@@ -64,29 +64,96 @@ class CompilerService {
       import io
       import base64
       plt.style.use('dark_background')
+      
+      SOLARIZED = {
+          'base03': '#002b36',
+          'base02': '#073642',
+          'base01': '#586e75',
+          'base0':  '#839496',
+          'base1':  '#93a1a1',
+          'base2':  '#eee8d5',
+          'base3':  '#fdf6e3',
+          'yellow': '#b58900',
+          'orange': '#cb4b16',
+          'red':    '#dc322f',
+          'magenta':'#d33682',
+          'violet': '#6c71c4',
+          'blue':   '#268bd2',
+          'cyan':   '#2aa198',
+          'green':  '#859900',
+      }
+      
       matplotlib.rcParams.update({
-        'figure.facecolor':'#0a0a0a',
-        'axes.facecolor':'#0a0a0a',
-        'axes.edgecolor':'#404040',
-        'grid.color':'#404040',
-        'text.color':'#ffffff',
-        'axes.labelcolor':'#ffffff',
-        'xtick.color':'#ffffff',
-        'ytick.color':'#ffffff',
-        'axes.spines.top':True,
-        'axes.spines.right':True,
-        'figure.figsize':[10,6],
-        'font.size':10
+          'figure.facecolor': SOLARIZED['base03'],
+          'axes.facecolor': SOLARIZED['base03'],
+          'axes.edgecolor': SOLARIZED['base0'],
+          'axes.labelcolor': SOLARIZED['base1'],
+          'text.color': SOLARIZED['base1'],
+          'xtick.color': SOLARIZED['base1'],
+          'ytick.color': SOLARIZED['base1'],
+          'grid.color': SOLARIZED['base0'],
+          'grid.alpha': 0.5,
+          'grid.linewidth': 1,
+          'axes.grid': True,
+          'grid.linestyle': '-',
+          'axes.spines.top': True,
+          'axes.spines.right': True,
+          'axes.spines.left': True,
+          'axes.spines.bottom': True,
+          'figure.figsize': [10, 6],
+          'font.size': 11,
+          'axes.labelsize': 11,
+          'axes.titlesize': 14,
+          'axes.titleweight': 'bold',
+          'lines.linewidth': 2.5,
+          'axes.prop_cycle': plt.cycler('color', [
+              SOLARIZED['base3'],
+              SOLARIZED['cyan'],
+              SOLARIZED['blue'],
+              SOLARIZED['yellow'],
+              SOLARIZED['red'],
+              SOLARIZED['magenta'],
+              SOLARIZED['violet'],
+              SOLARIZED['orange'],
+          ]),
+          'legend.facecolor': SOLARIZED['base02'],
+          'legend.edgecolor': SOLARIZED['base0'],
+          'legend.fontsize': 10,
+          'legend.framealpha': 1.0,
+          'patch.edgecolor': SOLARIZED['base0'],
+          'patch.force_edgecolor': True,
+          'savefig.dpi': 120,
+          'savefig.bbox': 'tight',
+          'savefig.facecolor': SOLARIZED['base03'],
+          'savefig.edgecolor': 'none',
+          'axes.axisbelow': True
       })
+      
+      def make_plot_solarized(fig):
+          for ax in fig.get_axes():
+              ax.set_axisbelow(True)
+              for spine in ax.spines.values():
+                  spine.set_color(SOLARIZED['base0'])
+                  spine.set_linewidth(1)
+              ax.grid(True, linestyle='-', alpha=0.5, color=SOLARIZED['base0'], linewidth=1)
+              ax.tick_params(colors=SOLARIZED['base1'], width=1)
+          return fig
+          
+      original_savefig = plt.savefig
+      def savefig_solarized(*args, **kwargs):
+          make_plot_solarized(plt.gcf())
+          return original_savefig(*args, **kwargs)
+      plt.savefig = savefig_solarized
+      
       class CaptureOutput:
-        def __init__(self):
-          self.content = []
-        def write(self, text):
-          self.content.append(text)
-        def flush(self):
-          pass
-        def getvalue(self):
-          return ''.join(self.content)
+          def __init__(self):
+              self.content = []
+          def write(self, text):
+              self.content.append(text)
+          def flush(self):
+              pass
+          def getvalue(self):
+              return ''.join(self.content)
       sys.stdout = CaptureOutput()
       sys.stderr = CaptureOutput()
     `);

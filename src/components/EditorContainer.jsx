@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
 import EditorTools from "./EditorTools";
 
@@ -7,7 +7,6 @@ const EditorContainer = ({ code, language, onChange, isRunning }) => {
 
   const handleEditorDidMount = (editor, monaco) => {
     setEditor(editor);
-
     editor.updateOptions({
       fontSize: 14,
       fontFamily: "'Fira Code', Consolas, monospace",
@@ -37,13 +36,36 @@ const EditorContainer = ({ code, language, onChange, isRunning }) => {
       mobileOptimizedSelection: true,
     });
 
-    monaco.editor.defineTheme("custom-dark", {
+    monaco.editor.defineTheme("solarized-dark", {
       base: "vs-dark",
       inherit: true,
-      rules: [],
-      colors: { "editorGhostText.foreground": "#00000000" },
+      rules: [
+        { token: "", foreground: "93a1a1" },
+        { token: "keyword", foreground: "859900" },
+        { token: "type", foreground: "268bd2" },
+        { token: "string", foreground: "2aa198" },
+        { token: "number", foreground: "d33682" },
+        { token: "comment", foreground: "586e75" },
+        { token: "constant", foreground: "cb4b16" },
+        { token: "variable", foreground: "b58900" },
+        { token: "function", foreground: "268bd2" },
+      ],
+      colors: {
+        "editor.background": "#002b36",
+        "editor.foreground": "#93a1a1",
+        "editorCursor.foreground": "#93a1a1",
+        "editor.lineHighlightBackground": "#073642",
+        "editorLineNumber.foreground": "#586e75",
+        "editor.selectionBackground": "#073642",
+        "editor.inactiveSelectionBackground": "#073642",
+        "editorIndentGuide.background": "#073642",
+        "editorBracketMatch.background": "#073642",
+        "editorBracketMatch.border": "#859900",
+        "editorGutter.background": "#002b36",
+        "editorGhostText.foreground": "#00000000",
+      },
     });
-    monaco.editor.setTheme("custom-dark");
+    monaco.editor.setTheme("solarized-dark");
   };
 
   return (
@@ -56,7 +78,7 @@ const EditorContainer = ({ code, language, onChange, isRunning }) => {
           value={code}
           onChange={onChange}
           onMount={handleEditorDidMount}
-          theme="custom-dark"
+          theme="solarized-dark"
           options={{ readOnly: isRunning }}
           saveViewState={false}
         />
