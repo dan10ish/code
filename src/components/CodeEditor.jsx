@@ -32,7 +32,87 @@ const InfoIcon = () => (
 const LANGUAGES = {
   python: {
     name: "Python",
-    defaultCode: `import numpy as np\nimport matplotlib.pyplot as plt\n\nx = np.linspace(0, 10, 100)\ny = np.sin(x)\n\nplt.figure(figsize=(8, 6))\nplt.plot(x, y, 'b-', label='sin(x)')\nplt.title('Sine Wave Plot')\nplt.xlabel('x')\nplt.ylabel('sin(x)')\nplt.grid(True)\nplt.legend()\nplt.show()`,
+    defaultCode: `import numpy as np
+import matplotlib.pyplot as plt
+
+# Set random seed for reproducibility
+np.random.seed(42)
+
+# Mathematical Functions Plot
+x = np.linspace(0, 10, 1000)
+functions = {
+    'sin(x)': np.sin(x),
+    'cos(x)': np.cos(x),
+    'exp(x/5)': np.exp(x/5)/100,
+    'log(x+1)': np.log(x+1)
+}
+
+plt.figure(figsize=(10, 6))
+for name, y in functions.items():
+    plt.plot(x[:200], y[:200], linewidth=2, label=name)
+plt.title('Mathematical Functions')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Damped Oscillation Plot
+time = np.linspace(0, 8*np.pi, 1000)
+amplitude = np.exp(-0.1 * time)
+signal = amplitude * np.sin(time)
+
+plt.figure(figsize=(10, 6))
+plt.plot(time, amplitude, 'r--', label='Envelope')
+plt.plot(time, -amplitude, 'r--')
+plt.plot(time, signal, 'b-', label='Signal')
+plt.title('Damped Oscillation')
+plt.xlabel('Time')
+plt.ylabel('Amplitude')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Parametric Curve Plot
+angles = np.linspace(0, 2*np.pi, 100)
+radius = 1 + np.sin(3*angles)
+x = radius * np.cos(angles)
+y = radius * np.sin(angles)
+
+plt.figure(figsize=(10, 6))
+plt.plot(x, y)
+plt.title('Parametric Curve')
+plt.axis('equal')
+plt.grid(True)
+plt.show()
+
+# Contour Plot
+x = np.linspace(-5, 5, 100)
+y = np.linspace(-5, 5, 100)
+X, Y = np.meshgrid(x, y)
+Z = np.sin(np.sqrt(X**2 + Y**2))
+
+plt.figure(figsize=(10, 6))
+contour = plt.contourf(X, Y, Z, levels=20, cmap='viridis')
+plt.colorbar(contour)
+plt.title('Wave Interference Pattern')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.show()
+
+# 3D Surface
+x = np.linspace(-3, 3, 50)
+y = np.linspace(-3, 3, 50)
+X, Y = np.meshgrid(x, y)
+Z = np.sin(np.sqrt(X**2 + Y**2))
+
+plt.figure(figsize=(10, 6))
+plt.imshow(Z, extent=[-3, 3, -3, 3], cmap='magma', aspect='equal')
+plt.colorbar(label='Value')
+plt.title('Surface Plot')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.show()`,
   },
   javascript: {
     name: "JavaScript",
@@ -56,16 +136,7 @@ const InfoModal = ({ isOpen, onClose }) =>
           <div className="info-section">
             <h3>Python (≥ 3.9)</h3>
             <div className="library-list">
-              {[
-                "numpy",
-                "matplotlib",
-                "pandas",
-                "scipy",
-                "plotly",
-                "scikit_learn",
-                "sympy",
-                "networkx",
-              ].map((lib) => (
+              {["numpy", "matplotlib", "pandas", "scipy"].map((lib) => (
                 <span key={lib} className="library-item">
                   {lib}
                 </span>
