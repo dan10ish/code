@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   Play,
   Square,
@@ -7,6 +7,8 @@ import {
   X,
   Download,
   Github,
+  Keyboard,
+  Command,
 } from "lucide-react";
 import { compiler } from "../services/compiler";
 import EditorContainer from "./EditorContainer";
@@ -32,87 +34,7 @@ const InfoIcon = () => (
 const LANGUAGES = {
   python: {
     name: "Python",
-    defaultCode: `import numpy as np
-import matplotlib.pyplot as plt
-
-# Set random seed for reproducibility
-np.random.seed(42)
-
-# Mathematical Functions Plot
-x = np.linspace(0, 10, 1000)
-functions = {
-    'sin(x)': np.sin(x),
-    'cos(x)': np.cos(x),
-    'exp(x/5)': np.exp(x/5)/100,
-    'log(x+1)': np.log(x+1)
-}
-
-plt.figure(figsize=(10, 6))
-for name, y in functions.items():
-    plt.plot(x[:200], y[:200], linewidth=2, label=name)
-plt.title('Mathematical Functions')
-plt.xlabel('x')
-plt.ylabel('y')
-plt.legend()
-plt.grid(True)
-plt.show()
-
-# Damped Oscillation Plot
-time = np.linspace(0, 8*np.pi, 1000)
-amplitude = np.exp(-0.1 * time)
-signal = amplitude * np.sin(time)
-
-plt.figure(figsize=(10, 6))
-plt.plot(time, amplitude, 'r--', label='Envelope')
-plt.plot(time, -amplitude, 'r--')
-plt.plot(time, signal, 'b-', label='Signal')
-plt.title('Damped Oscillation')
-plt.xlabel('Time')
-plt.ylabel('Amplitude')
-plt.legend()
-plt.grid(True)
-plt.show()
-
-# Parametric Curve Plot
-angles = np.linspace(0, 2*np.pi, 100)
-radius = 1 + np.sin(3*angles)
-x = radius * np.cos(angles)
-y = radius * np.sin(angles)
-
-plt.figure(figsize=(10, 6))
-plt.plot(x, y)
-plt.title('Parametric Curve')
-plt.axis('equal')
-plt.grid(True)
-plt.show()
-
-# Contour Plot
-x = np.linspace(-5, 5, 100)
-y = np.linspace(-5, 5, 100)
-X, Y = np.meshgrid(x, y)
-Z = np.sin(np.sqrt(X**2 + Y**2))
-
-plt.figure(figsize=(10, 6))
-contour = plt.contourf(X, Y, Z, levels=20, cmap='viridis')
-plt.colorbar(contour)
-plt.title('Wave Interference Pattern')
-plt.xlabel('x')
-plt.ylabel('y')
-plt.show()
-
-# 3D Surface
-x = np.linspace(-3, 3, 50)
-y = np.linspace(-3, 3, 50)
-X, Y = np.meshgrid(x, y)
-Z = np.sin(np.sqrt(X**2 + Y**2))
-
-plt.figure(figsize=(10, 6))
-plt.imshow(Z, extent=[-3, 3, -3, 3], cmap='magma', aspect='equal')
-plt.colorbar(label='Value')
-plt.title('Surface Plot')
-plt.xlabel('x')
-plt.ylabel('y')
-plt.show()`,
+    defaultCode: `import numpy as np\nimport matplotlib.pyplot as plt\nnp.random.seed(42)\nx = np.linspace(0, 10, 1000)\nfunctions = {\n'sin(x)': np.sin(x),\n'cos(x)': np.cos(x),\n'exp(x/5)': np.exp(x/5)/100,\n'log(x+1)': np.log(x+1)\n}\nplt.figure(figsize=(10, 6))\nfor name, y in functions.items():\n plt.plot(x[:200], y[:200], linewidth=2, label=name)\nplt.title('Mathematical Functions')\nplt.xlabel('x')\nplt.ylabel('y')\nplt.legend()\nplt.grid(True)\nplt.show()\ntime = np.linspace(0, 8*np.pi, 1000)\namplitude = np.exp(-0.1 * time)\nsignal = amplitude * np.sin(time)\nplt.figure(figsize=(10, 6))\nplt.plot(time, amplitude, 'r--', label='Envelope')\nplt.plot(time, -amplitude, 'r--')\nplt.plot(time, signal, 'b-', label='Signal')\nplt.title('Damped Oscillation')\nplt.xlabel('Time')\nplt.ylabel('Amplitude')\nplt.legend()\nplt.grid(True)\nplt.show()\nangles = np.linspace(0, 2*np.pi, 100)\nradius = 1 + np.sin(3*angles)\nx = radius * np.cos(angles)\ny = radius * np.sin(angles)\nplt.figure(figsize=(10, 6))\nplt.plot(x, y)\nplt.title('Parametric Curve')\nplt.axis('equal')\nplt.grid(True)\nplt.show()\nx = np.linspace(-5, 5, 100)\ny = np.linspace(-5, 5, 100)\nX, Y = np.meshgrid(x, y)\nZ = np.sin(np.sqrt(X**2 + Y**2))\nplt.figure(figsize=(10, 6))\ncontour = plt.contourf(X, Y, Z, levels=20, cmap='viridis')\nplt.colorbar(contour)\nplt.title('Wave Interference Pattern')\nplt.xlabel('x')\nplt.ylabel('y')\nplt.show()\nx = np.linspace(-3, 3, 50)\ny = np.linspace(-3, 3, 50)\nX, Y = np.meshgrid(x, y)\nZ = np.sin(np.sqrt(X**2 + Y**2))\nplt.figure(figsize=(10, 6))\nplt.imshow(Z, extent=[-3, 3, -3, 3], cmap='magma', aspect='equal')\nplt.colorbar(label='Value')\nplt.title('Surface Plot')\nplt.xlabel('x')\nplt.ylabel('y')\nplt.show()`,
   },
   javascript: {
     name: "JavaScript",
@@ -121,6 +43,26 @@ plt.show()`,
   cpp: {
     name: "C++",
     defaultCode: `#include <iostream>\n#include <string>\n\nint main() {\n    std::string name;\n    std::string age;\n    \n    std::cout << "What's your name? ";\n    std::cin >> name;\n    \n    std::cout << "How old are you? ";\n    std::cin >> age;\n    \n    std::cout << "Hello " << name << "! You are " << age << " years old.\\n";\n    return 0;\n}`,
+  },
+};
+
+const SHORTCUTS = {
+  toggleRunStop: {
+    key: "Enter",
+    modifier: "Ctrl / Command",
+    description: "Run/Stop code",
+  },
+  toggleConsole: { key: "`", modifier: "Ctrl", description: "Toggle console" },
+  clearConsole: { key: "K", modifier: "Ctrl", description: "Clear console" },
+  increaseFontSize: {
+    key: "+",
+    modifier: "Ctrl",
+    description: "Increase font size",
+  },
+  decreaseFontSize: {
+    key: "-",
+    modifier: "Ctrl",
+    description: "Decrease font size",
   },
 };
 
@@ -133,6 +75,30 @@ const InfoModal = ({ isOpen, onClose }) =>
         </button>
         <div className="info-content">
           <h2 className="info-title">Supported Features</h2>
+          <div className="info-section keyboard-shortcuts-section">
+            <h3 className="keyboard-section-title">
+              <Keyboard size={20} strokeWidth={1.5} />
+              Keyboard Shortcuts
+            </h3>
+            <div className="keyboard-shortcuts">
+              {Object.entries(SHORTCUTS).map(
+                ([key, { key: shortcutKey, modifier, description }]) => (
+                  <div key={key} className="keyboard-shortcut">
+                    <span>
+                      {modifier.split(" / ").map((mod, idx) => (
+                        <React.Fragment key={idx}>
+                          {mod === "Command" ? <Command size={14} /> : mod}
+                          {idx < modifier.split(" / ").length - 1 && " / "}
+                        </React.Fragment>
+                      ))}{" "}
+                      {shortcutKey}
+                    </span>
+                    <span>{description}</span>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
           <div className="info-section">
             <h3>Python (≥ 3.9)</h3>
             <div className="library-list">
@@ -231,6 +197,7 @@ const CodeEditor = () => {
   const [inputValue, setInputValue] = useState("");
   const [inputResolver, setInputResolver] = useState(null);
   const abortControllerRef = useRef(null);
+  const editorRef = useRef(null);
 
   const handleInput = async (prompt) => {
     if (language === "python") return "";
@@ -347,148 +314,194 @@ const CodeEditor = () => {
     }
   }, [code, language]);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+      const cmdKey = isMac ? e.metaKey : e.ctrlKey;
+
+      if (cmdKey && e.key === SHORTCUTS.toggleRunStop.key) {
+        e.preventDefault();
+        if (!isRunning) {
+          runCode();
+        } else {
+          stopCode();
+        }
+      } else if (e.ctrlKey && e.key === SHORTCUTS.toggleConsole.key) {
+        e.preventDefault();
+        setShowConsole((prev) => !prev);
+      } else if (
+        e.ctrlKey &&
+        e.key === SHORTCUTS.clearConsole.key &&
+        showConsole
+      ) {
+        e.preventDefault();
+        setOutputBuffer([]);
+        setOutput(null);
+      } else if (e.ctrlKey && e.key === SHORTCUTS.increaseFontSize.key) {
+        e.preventDefault();
+        editorRef.current?.updateOptions({
+          fontSize: (editorRef.current.getOption("fontSize") || 14) + 1,
+        });
+      } else if (e.ctrlKey && e.key === SHORTCUTS.decreaseFontSize.key) {
+        e.preventDefault();
+        editorRef.current?.updateOptions({
+          fontSize: Math.max(
+            (editorRef.current.getOption("fontSize") || 14) - 1,
+            8
+          ),
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isRunning, showConsole, runCode, stopCode]);
+
   return (
-    <div className="editor-container">
-      <div className="toolbar">
-        <div className="toolbar-group">
-          <select
-            className="language-select"
-            value={language}
-            onChange={(e) => {
-              setLanguage(e.target.value);
-              setCode(LANGUAGES[e.target.value].defaultCode);
-              setOutput(null);
-              setOutputBuffer([]);
-            }}
-          >
-            {Object.entries(LANGUAGES).map(([key, lang]) => (
-              <option key={key} value={key}>
-                {lang.name}
-              </option>
-            ))}
-          </select>
-          <button
-            className="button-icon"
-            onClick={() => setShowConsole(!showConsole)}
-          >
-            <Terminal size={20} />
-          </button>
-        </div>
-        <div className="toolbar-group">
-          <a
-            href="https://github.com/dan10ish/code"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="button-icon"
-          >
-            <Github size={20} />
-          </a>
-          <button className="button-icon" onClick={() => setShowInfo(true)}>
-            <InfoIcon />
-          </button>
-          <button
-            className={`button ${
-              isRunning || isStopping ? "button-danger" : "button-primary"
-            }`}
-            onClick={isRunning ? stopCode : runCode}
-            disabled={isStopping}
-          >
-            {isRunning ? <Square size={16} /> : <Play size={16} />}
-          </button>
-        </div>
-      </div>
-
-      <div className={`editor-layout ${!showConsole ? "full" : ""}`}>
-        <div className="editor-pane">
-          <EditorContainer
-            code={code}
-            language={language}
-            onChange={setCode}
-            isRunning={isRunning}
-          />
-        </div>
-
-        {showConsole && (
-          <div className={`console-panel ${showConsole ? "show" : ""}`}>
-            <div className="console-header">
-              <div className="console-header-text">
-                <Terminal size={16} />
-                <span>Output</span>
-              </div>
-              <button
-                className="button-icon button-close"
-                onClick={() => setShowConsole(false)}
-              >
-                <X size={16} />
-              </button>
-            </div>
-            <div className="console-content">
-              {(isRunning || isStopping) && (
-                <div className="console-loading">
-                  <Loader2 className="spinner" size={24} />
-                  <span>
-                    {isStopping ? "Stopping code..." : "Running code..."}
-                  </span>
-                </div>
-              )}
-              {outputBuffer.map((item, index) => (
-                <pre key={index} className={`${item.type}-text`}>
-                  {item.text}
-                </pre>
+    <>
+      <div className="editor-container">
+        <div className="toolbar">
+          <div className="toolbar-group">
+            <select
+              className="language-select"
+              value={language}
+              onChange={(e) => {
+                setLanguage(e.target.value);
+                setCode(LANGUAGES[e.target.value].defaultCode);
+                setOutput(null);
+                setOutputBuffer([]);
+              }}
+            >
+              {Object.entries(LANGUAGES).map(([key, lang]) => (
+                <option key={key} value={key}>
+                  {lang.name}
+                </option>
               ))}
-              {output?.plot &&
-                output.plot.map((plotSrc, index) => (
-                  <div key={index} className="plot-container">
-                    <img
-                      src={plotSrc}
-                      alt={`Plot ${index + 1}`}
-                      onClick={() => setSelectedPlot(plotSrc)}
-                    />
-                    <div className="plot-actions">
-                      <button
-                        className="tool-button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const link = document.createElement("a");
-                          link.href = plotSrc;
-                          link.download = `plot-${index + 1}.png`;
-                          link.click();
-                        }}
-                      >
-                        <Download size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              {waitingForInput && (
-                <div className="console-input-container">
-                  <input
-                    type="text"
-                    className="console-input"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder={inputPrompt}
-                    autoFocus
-                    disabled={isStopping}
-                  />
-                  <button
-                    className="console-input-button"
-                    onClick={submitInput}
-                    disabled={isStopping}
-                  >
-                    Enter
-                  </button>
-                </div>
-              )}
-            </div>
+            </select>
+            <button
+              className="button-icon"
+              onClick={() => setShowConsole(!showConsole)}
+            >
+              <Terminal size={20} />
+            </button>
           </div>
-        )}
+          <div className="toolbar-group">
+            <a
+              href="https://github.com/dan10ish/code"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="button-icon"
+            >
+              <Github size={20} />
+            </a>
+            <button className="button-icon" onClick={() => setShowInfo(true)}>
+              <InfoIcon />
+            </button>
+            <button
+              className={`button ${
+                isRunning || isStopping ? "button-danger" : "button-primary"
+              }`}
+              onClick={isRunning ? stopCode : runCode}
+              disabled={isStopping}
+            >
+              {isRunning ? <Square size={16} /> : <Play size={16} />}
+            </button>
+          </div>
+        </div>
+
+        <div className={`editor-layout ${!showConsole ? "full" : ""}`}>
+          <div className="editor-pane">
+            <EditorContainer
+              code={code}
+              language={language}
+              onChange={setCode}
+              isRunning={isRunning}
+              editorRef={editorRef}
+            />
+          </div>
+
+          {showConsole && (
+            <div className={`console-panel ${showConsole ? "show" : ""}`}>
+              <div className="console-header">
+                <div className="console-header-text">
+                  <Terminal size={16} />
+                  <span>Output</span>
+                </div>
+                <button
+                  className="button-icon button-close"
+                  onClick={() => setShowConsole(false)}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="console-content">
+                {(isRunning || isStopping) && (
+                  <div className="console-loading">
+                    <Loader2 className="spinner" size={24} />
+                    <span>
+                      {isStopping ? "Stopping code..." : "Running code..."}
+                    </span>
+                  </div>
+                )}
+                {outputBuffer.map((item, index) => (
+                  <pre key={index} className={`${item.type}-text`}>
+                    {item.text}
+                  </pre>
+                ))}
+                {output?.plot &&
+                  output.plot.map((plotSrc, index) => (
+                    <div key={index} className="plot-container">
+                      <img
+                        src={plotSrc}
+                        alt={`Plot ${index + 1}`}
+                        onClick={() => setSelectedPlot(plotSrc)}
+                      />
+                      <div className="plot-actions">
+                        <button
+                          className="tool-button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const link = document.createElement("a");
+                            link.href = plotSrc;
+                            link.download = `plot-${index + 1}.png`;
+                            link.click();
+                          }}
+                        >
+                          <Download size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                {waitingForInput && (
+                  <div className="console-input-container">
+                    <input
+                      type="text"
+                      className="console-input"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder={inputPrompt}
+                      autoFocus
+                      disabled={isStopping}
+                    />
+                    <button
+                      className="console-input-button"
+                      onClick={submitInput}
+                      disabled={isStopping}
+                    >
+                      Enter
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        <PlotModal src={selectedPlot} onClose={() => setSelectedPlot(null)} />
+        <InfoModal isOpen={showInfo} onClose={() => setShowInfo(false)} />
+        <Attribution />
       </div>
-      <PlotModal src={selectedPlot} onClose={() => setSelectedPlot(null)} />
-      <InfoModal isOpen={showInfo} onClose={() => setShowInfo(false)} />
-      <Attribution />
-    </div>
+    </>
   );
 };
 

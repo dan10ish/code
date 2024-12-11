@@ -398,7 +398,7 @@ textarea {
   background-color: var(--bg-primary);
   border-radius: var(--radius-lg);
   padding: var(--space-8);
-  margin: var(--space-16) 0 48px 0;
+  margin: var(--space-16) 0 68px 0;
   border: 1px solid var(--border-color);
   transition: var(--transition-all);
   position: relative;
@@ -774,5 +774,54 @@ textarea {
   .plot-modal,
   .plot-modal-content {
     cursor: default;
+  }
+}
+
+@media (min-width: 768px) {
+  .keyboard-shortcuts-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-12);
+  }
+
+  .keyboard-shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  .keyboard-shortcut {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    padding: var(--space-6) var(--space-8);
+    border-radius: var(--radius-sm);
+    font-family: "Fira Code", monospace;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+  }
+
+  .keyboard-shortcut span:first-child {
+    background-color: var(--accent-primary);
+    color: var(--base2);
+    padding: var(--space-4) var(--space-6);
+    border-radius: var(--radius-sm);
+  }
+
+  .keyboard-shortcut span:last-child {
+    color: var(--text-secondary);
+  }
+
+  .keyboard-section-title {
+    display: flex;
+    gap: var(--space-6);
+    align-items: center;
+  }
+}
+
+@media (max-width: 767px) {
+  .keyboard-shortcuts-section {
+    display: none;
   }
 }
