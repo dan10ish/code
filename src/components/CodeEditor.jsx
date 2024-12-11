@@ -50,10 +50,9 @@ const SHORTCUTS = {
   toggleRunStop: {
     key: "Enter",
     modifier: "Ctrl / Command",
-    description: "Run/Stop code",
+    description: "Run / Stop code",
   },
   toggleConsole: { key: "`", modifier: "Ctrl", description: "Toggle console" },
-  clearConsole: { key: "K", modifier: "Ctrl", description: "Clear console" },
   increaseFontSize: {
     key: "+",
     modifier: "Ctrl",
@@ -95,7 +94,7 @@ const InfoModal = ({ isOpen, onClose }) =>
                     </span>
                     <span>{description}</span>
                   </div>
-                )
+                ),
               )}
             </div>
           </div>
@@ -132,7 +131,7 @@ const InfoModal = ({ isOpen, onClose }) =>
                   <span key={feature} className="library-item">
                     {feature}
                   </span>
-                )
+                ),
               )}
             </div>
           </div>
@@ -347,7 +346,7 @@ const CodeEditor = () => {
         editorRef.current?.updateOptions({
           fontSize: Math.max(
             (editorRef.current.getOption("fontSize") || 14) - 1,
-            8
+            8,
           ),
         });
       }

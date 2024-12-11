@@ -809,6 +809,11 @@ textarea {
     border-radius: var(--radius-sm);
   }
 
+  .keyboard-shortcut span:first-child svg {
+    position: relative;
+    top: 1.8px;
+  }
+
   .keyboard-shortcut span:last-child {
     color: var(--text-secondary);
   }
