@@ -23,6 +23,19 @@ const LANGUAGES = {
     name: "C++",
     defaultCode: `// Sample Code\n#include <iostream>\n#include <string>\n\nint main() {\n    std::string name;\n    std::string age;\n    \n    std::cout << "What's your name? ";\n    std::cin >> name;\n    \n    std::cout << "How old are you? ";\n    std::cin >> age;\n    \n    std::cout << "Hello " << name << "! You are " << age << " years old.\\n";\n    return 0;\n}`,
   },
+  p5js: {
+      name: 'p5.js',
+      defaultCode: `function setup() {
+    background(0);
+    noStroke();
+    colorMode(HSB);
+  }
+  
+  function draw() {
+    fill(random(360), 100, 100, 0.1);
+    circle(random(width), random(height), 20);
+  }`,
+    },
 };
 
 const EditorTools = ({ editor, language }) => {
@@ -93,11 +106,10 @@ const EditorTools = ({ editor, language }) => {
 
   const handleDownload = useCallback(() => {
     const code = editor.getValue();
-    const ext =
-      language === "python"
-        ? ".py"
-        : language === "javascript"
-        ? ".js"
+    const ext = 
+        language === "python" ? ".py" 
+        : language === "javascript" ? ".js"
+        : language === "p5js" ? ".js"
         : ".cpp";
     const blob = new Blob([code], { type: "text/plain" });
     const url = URL.createObjectURL(blob);

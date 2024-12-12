@@ -64,7 +64,7 @@ class CompilerService {
       import io
       import base64
       plt.style.use('dark_background')
-      
+
       SOLARIZED = {
           'base03': '#002b36',
           'base02': '#073642',
@@ -82,7 +82,7 @@ class CompilerService {
           'cyan':   '#2aa198',
           'green':  '#859900',
       }
-      
+
       matplotlib.rcParams.update({
           'figure.facecolor': SOLARIZED['base03'],
           'axes.facecolor': SOLARIZED['base03'],
@@ -128,7 +128,7 @@ class CompilerService {
           'savefig.edgecolor': 'none',
           'axes.axisbelow': True
       })
-      
+
       def make_plot_solarized(fig):
           for ax in fig.get_axes():
               ax.set_axisbelow(True)
@@ -138,13 +138,13 @@ class CompilerService {
               ax.grid(True, linestyle='-', alpha=0.5, color=SOLARIZED['base0'], linewidth=1)
               ax.tick_params(colors=SOLARIZED['base1'], width=1)
           return fig
-          
+
       original_savefig = plt.savefig
       def savefig_solarized(*args, **kwargs):
           make_plot_solarized(plt.gcf())
           return original_savefig(*args, **kwargs)
       plt.savefig = savefig_solarized
-      
+
       class CaptureOutput:
           def __init__(self):
               self.content = []
@@ -190,7 +190,7 @@ class CompilerService {
       ...new Set(
         imports
           .map((imp) => imp.split(/\s+/)[1].split(".")[0])
-          .filter((pkg) => this.packageDeps.hasOwnProperty(pkg))
+          .filter((pkg) => this.packageDeps.hasOwnProperty(pkg)),
       ),
     ];
   }
@@ -256,14 +256,14 @@ class CompilerService {
             (output +=
               args
                 .map((arg) =>
-                  typeof arg === "object" ? JSON.stringify(arg) : String(arg)
+                  typeof arg === "object" ? JSON.stringify(arg) : String(arg),
                 )
                 .join(" ") + "\n"),
           error: (...args) =>
             (error +=
               args
                 .map((arg) =>
-                  typeof arg === "object" ? JSON.stringify(arg) : String(arg)
+                  typeof arg === "object" ? JSON.stringify(arg) : String(arg),
                 )
                 .join(" ") + "\n"),
           warn: (...args) => (output += "Warning: " + args.join(" ") + "\n"),
@@ -274,7 +274,7 @@ class CompilerService {
 
       const fn = new Function(
         ...Object.keys(sandbox),
-        `async function __run() {${code}}\n__run();`
+        `async function __run() {${code}}\n__run();`,
       );
       await fn(...Object.values(sandbox));
 
@@ -316,6 +316,26 @@ class CompilerService {
       };
     } catch (error) {
       return { output: "", error: "Compilation failed: " + error.message };
+    }
+  }
+
+  async runP5js(code, signal) {
+    try {
+      if (signal?.aborted) {
+        throw new Error("Execution stopped");
+      }
+
+      return {
+        output: "P5.js sketch ready",
+        error: null,
+        sketch: code,
+      };
+    } catch (error) {
+      return {
+        output: "",
+        error: `P5.js error: ${error.toString()}`,
+        sketch: null,
+      };
     }
   }
 }

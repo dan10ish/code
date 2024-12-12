@@ -36,6 +36,63 @@ const EditorContainer = ({ code, language, onChange, isRunning }) => {
       mobileOptimizedSelection: true,
     });
 
+    monaco.languages.register({ id: "p5js" });
+    monaco.languages.setMonarchTokensProvider("p5js", {
+      keywords: [
+        "function",
+        "setup",
+        "draw",
+        "createCanvas",
+        "background",
+        "fill",
+        "stroke",
+        "noStroke",
+        "ellipse",
+        "rect",
+        "circle",
+        "line",
+        "mouseX",
+        "mouseY",
+        "width",
+        "height",
+        "random",
+        "frameCount",
+        "colorMode",
+        "HSB",
+        "RGB",
+        "push",
+        "pop",
+        "translate",
+        "rotate",
+        "scale",
+        "let",
+        "const",
+        "if",
+        "else",
+        "for",
+        "while",
+      ],
+      tokenizer: {
+        root: [
+          [
+            /[a-z_$][\w$]*/,
+            { cases: { "@keywords": "keyword", "@default": "variable" } },
+          ],
+          [/[A-Z][\w\$]*/, "type.identifier"],
+          [/".*?"/, "string"],
+          [/'.*?'/, "string"],
+          [/[0-9]+/, "number"],
+          [/\/\/.*$/, "comment"],
+          [/\/\*/, "comment", "@comment"],
+        ],
+        comment: [
+          [/[^\/*]+/, "comment"],
+          [/\*\//, "comment", "@pop"],
+          [/[\/*]/, "comment"],
+        ],
+      },
+    });
+
     monaco.editor.defineTheme("solarized-dark", {
       base: "vs-dark",
       inherit: true,

@@ -44,6 +44,31 @@ const LANGUAGES = {
     name: "C++",
     defaultCode: `#include <iostream>\n#include <string>\n\nint main() {\n    std::string name;\n    std::string age;\n    \n    std::cout << "What's your name? ";\n    std::cin >> name;\n    \n    std::cout << "How old are you? ";\n    std::cin >> age;\n    \n    std::cout << "Hello " << name << "! You are " << age << " years old.\\n";\n    return 0;\n}`,
   },
+  p5js: {
+    name: "p5.js",
+    defaultCode: `function setup() {
+  createCanvas(400, 400);
+  colorMode(HSB);
+  background(0);
+}
+
+function draw() {
+  if (mouseIsPressed) {
+    noStroke();
+    fill(frameCount % 360, 80, 100, 0.5);
+    circle(mouseX, mouseY, 20);
+  }
+
+  translate(width/2, height/2);
+  let angle = frameCount * 0.1;
+  let radius = frameCount % 100;
+  let x = cos(angle) * radius;
+  let y = sin(angle) * radius;
+  noStroke();
+  fill((frameCount * 2) % 360, 100, 100, 0.1);
+  circle(x, y, 10);
+}`,
+  },
 };
 
 const SHORTCUTS = {
@@ -76,8 +101,7 @@ const InfoModal = ({ isOpen, onClose }) =>
           <h2 className="info-title">Supported Features</h2>
           <div className="info-section keyboard-shortcuts-section">
             <h3 className="keyboard-section-title">
-              <Keyboard size={20} strokeWidth={1.5} />
-              Keyboard Shortcuts
+              <Keyboard size={20} strokeWidth={1.5} /> Keyboard Shortcuts
             </h3>
             <div className="keyboard-shortcuts">
               {Object.entries(SHORTCUTS).map(
@@ -133,6 +157,21 @@ const InfoModal = ({ isOpen, onClose }) =>
                   </span>
                 ),
               )}
+            </div>
+          </div>
+          <div className="info-section">
+            <h3>p5.js (Creative Coding)</h3>
+            <div className="library-list">
+              {[
+                "p5.js core",
+                "p5.sound",
+                "canvas graphics",
+                "interactive elements",
+              ].map((lib) => (
+                <span key={lib} className="library-item">
+                  {lib}
+                </span>
+              ))}
             </div>
           </div>
         </div>
@@ -198,6 +237,79 @@ const CodeEditor = () => {
   const abortControllerRef = useRef(null);
   const editorRef = useRef(null);
 
+  const renderOutput = useCallback(() => {
+    return (
+      <>
+        {outputBuffer.map((item, index) => (
+          <pre key={index} className={`${item.type}-text`}>
+            {item.text}
+          </pre>
+        ))}
+
+        {language === "p5js" && (
+          <div className="p5-canvas-wrapper">
+            <div className="p5-status">Running sketch...</div>
+            <div id="p5-canvas-container" className="p5-canvas-container" />
+          </div>
+        )}
+
+        {output?.plot &&
+          output.plot.map((plotSrc, index) => (
+            <div key={index} className="plot-container">
+              <img
+                src={plotSrc}
+                alt={`Plot ${index + 1}`}
+                onClick={() => setSelectedPlot(plotSrc)}
+              />
+              <div className="plot-actions">
+                <button
+                  className="tool-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const link = document.createElement("a");
+                    link.href = plotSrc;
+                    link.download = `plot-${index + 1}.png`;
+                    link.click();
+                  }}
+                >
+                  <Download size={16} />
+                </button>
+              </div>
+            </div>
+          ))}
+
+        {(isRunning || isStopping) && language !== "p5js" && (
+          <div className="console-loading">
+            <Loader2 className="spinner" size={24} />
+            <span>{isStopping ? "Stopping code..." : "Running code..."}</span>
+          </div>
+        )}
+
+        {waitingForInput && (
+          <div className="console-input-container">
+            <input
+              type="text"
+              className="console-input"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={inputPrompt}
+              autoFocus
+              disabled={isStopping}
+            />
+            <button
+              className="console-input-button"
+              onClick={submitInput}
+              disabled={isStopping}
+            >
+              Enter
+            </button>
+          </div>
+        )}
+      </>
+    );
+  }, [language, outputBuffer, output, isRunning]);
+
   const handleInput = async (prompt) => {
     if (language === "python") return "";
     return new Promise((resolve, reject) => {
@@ -247,77 +359,158 @@ const CodeEditor = () => {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
+
+    if (language === "p5js" && window.currentP5Instance) {
+      window.currentP5Instance.remove();
+      delete window.currentP5Instance;
+      const container = document.getElementById("p5-canvas-container");
+      if (container) container.innerHTML = "";
+    }
+
     if (inputResolver) {
       setWaitingForInput(false);
       setInputPrompt("");
       setInputValue("");
       setInputResolver(null);
     }
-    setTimeout(() => {
-      setIsRunning(false);
-      setIsStopping(false);
-      setShowConsole(false);
-      setOutputBuffer([]);
-      setOutput(null);
-    }, 500);
-  };
 
-  const runCode = useCallback(async () => {
-    setIsRunning(true);
+    setIsRunning(false);
     setIsStopping(false);
     setOutputBuffer([]);
     setOutput(null);
-    setShowConsole(true);
+  };
 
-    abortControllerRef.current = new AbortController();
-    const signal = abortControllerRef.current.signal;
+  const runCode = useCallback(async () => {
+    if (!isRunning) {
+      const executeCode = async () => {
+        setIsRunning(true);
+        setIsStopping(false);
+        setOutputBuffer([]);
+        setOutput(null);
 
-    try {
-      let result;
-      switch (language) {
-        case "python":
-          result = await compiler.runPython(code, signal);
-          break;
-        case "javascript":
-          result = await compiler.runJavaScript(code, handleInput, signal);
-          break;
-        case "cpp":
-          result = await compiler.runCPP(code, handleInput, signal);
-          break;
-        default:
-          throw new Error(`Language ${language} not supported`);
-      }
+        abortControllerRef.current = new AbortController();
 
-      if (signal.aborted) return;
+        try {
+          if (language === "p5js") {
+            const canvasContainer = document.getElementById(
+              "p5-canvas-container",
+            );
+            if (canvasContainer) {
+              canvasContainer.innerHTML = "";
 
-      if (result.output) {
-        setOutputBuffer([
-          { text: result.output, type: result.error ? "error" : "output" },
-        ]);
-      }
-      if (result.error && language !== "python") {
-        setOutputBuffer((prev) => [
-          ...prev,
-          { text: result.error, type: "error" },
-        ]);
-      }
-      if (result.plot) setOutput(result);
-    } catch (error) {
-      if (!signal.aborted) {
-        setOutputBuffer([{ text: error.message, type: "error" }]);
-      }
-    } finally {
-      if (!signal.aborted) {
-        setIsRunning(false);
+              const createSketch = (codeString) => {
+                return (p) => {
+                  const globalObject = {};
+                  Object.getOwnPropertyNames(p).forEach((prop) => {
+                    globalObject[prop] = p[prop];
+                  });
+
+                  const wrappedCode = `
+                    with (p) {
+                      ${codeString}
+                    }
+                    if (typeof setup !== 'undefined') p.userSetup = setup;
+                    if (typeof draw !== 'undefined') p.userDraw = draw;
+                  `;
+
+                  Function("p", wrappedCode)(p);
+
+                  p.setup = function () {
+                    const canvas = p.createCanvas(400, 400);
+                    canvas.elt.style.pointerEvents = "none";
+                    if (p.userSetup) p.userSetup();
+                  };
+
+                  p.draw = function () {
+                    if (p.userDraw) p.userDraw();
+                  };
+                };
+              };
+
+              window.currentP5Instance = new window.p5(
+                createSketch(code),
+                canvasContainer,
+              );
+              document.querySelector(
+                "#p5-canvas-container canvas",
+              ).style.pointerEvents = "none";
+            }
+          } else {
+            let result;
+            switch (language) {
+              case "python":
+                result = await compiler.runPython(
+                  code,
+                  abortControllerRef.current.signal,
+                );
+                break;
+              case "javascript":
+                result = await compiler.runJavaScript(
+                  code,
+                  handleInput,
+                  abortControllerRef.current.signal,
+                );
+                break;
+              case "cpp":
+                result = await compiler.runCPP(
+                  code,
+                  handleInput,
+                  abortControllerRef.current.signal,
+                );
+                break;
+            }
+
+            if (result?.output) {
+              setOutputBuffer([
+                {
+                  text: result.output,
+                  type: result.error ? "error" : "output",
+                },
+              ]);
+            }
+            if (result?.error && language !== "python") {
+              setOutputBuffer((prev) => [
+                ...prev,
+                { text: result.error, type: "error" },
+              ]);
+            }
+            if (result?.plot) setOutput(result);
+            setIsRunning(false);
+          }
+        } catch (error) {
+          if (!abortControllerRef.current.signal.aborted) {
+            setOutputBuffer([{ text: error.message, type: "error" }]);
+            setIsRunning(false);
+          }
+        }
+      };
+
+      if (!showConsole) {
+        setShowConsole(true);
+        setTimeout(executeCode, 100);
+      } else {
+        executeCode();
       }
     }
-  }, [code, language]);
+  }, [code, language, handleInput, isRunning, showConsole]);
+
+  const handleLanguageChange = (e) => {
+    stopCode();
+    setLanguage(e.target.value);
+    setCode(LANGUAGES[e.target.value].defaultCode);
+    setOutput(null);
+    setOutputBuffer([]);
+  };
+
+  const handleConsoleClose = () => {
+    stopCode();
+    setShowConsole(false);
+  };
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
       const cmdKey = isMac ? e.metaKey : e.ctrlKey;
-
       if (cmdKey && e.key === SHORTCUTS.toggleRunStop.key) {
         e.preventDefault();
         if (!isRunning) {
@@ -328,14 +521,6 @@ const CodeEditor = () => {
       } else if (e.ctrlKey && e.key === SHORTCUTS.toggleConsole.key) {
         e.preventDefault();
         setShowConsole((prev) => !prev);
-      } else if (
-        e.ctrlKey &&
-        e.key === SHORTCUTS.clearConsole.key &&
-        showConsole
-      ) {
-        e.preventDefault();
-        setOutputBuffer([]);
-        setOutput(null);
       } else if (e.ctrlKey && e.key === SHORTCUTS.increaseFontSize.key) {
         e.preventDefault();
         editorRef.current?.updateOptions({
@@ -364,12 +549,7 @@ const CodeEditor = () => {
             <select
               className="language-select"
               value={language}
-              onChange={(e) => {
-                setLanguage(e.target.value);
-                setCode(LANGUAGES[e.target.value].defaultCode);
-                setOutput(null);
-                setOutputBuffer([]);
-              }}
+              onChange={handleLanguageChange}
             >
               {Object.entries(LANGUAGES).map(([key, lang]) => (
                 <option key={key} value={key}>
@@ -377,6 +557,7 @@ const CodeEditor = () => {
                 </option>
               ))}
             </select>
+
             <button
               className="button-icon"
               onClick={() => setShowConsole(!showConsole)}
@@ -397,9 +578,7 @@ const CodeEditor = () => {
               <InfoIcon />
             </button>
             <button
-              className={`button ${
-                isRunning || isStopping ? "button-danger" : "button-primary"
-              }`}
+              className={`button ${isRunning || isStopping ? "button-danger" : "button-primary"}`}
               onClick={isRunning ? stopCode : runCode}
               disabled={isStopping}
             >
@@ -428,12 +607,13 @@ const CodeEditor = () => {
                 </div>
                 <button
                   className="button-icon button-close"
-                  onClick={() => setShowConsole(false)}
+                  onClick={handleConsoleClose}
                 >
                   <X size={16} />
                 </button>
               </div>
               <div className="console-content">
+                {renderOutput()}
                 {(isRunning || isStopping) && (
                   <div className="console-loading">
                     <Loader2 className="spinner" size={24} />
@@ -442,35 +622,6 @@ const CodeEditor = () => {
                     </span>
                   </div>
                 )}
-                {outputBuffer.map((item, index) => (
-                  <pre key={index} className={`${item.type}-text`}>
-                    {item.text}
-                  </pre>
-                ))}
-                {output?.plot &&
-                  output.plot.map((plotSrc, index) => (
-                    <div key={index} className="plot-container">
-                      <img
-                        src={plotSrc}
-                        alt={`Plot ${index + 1}`}
-                        onClick={() => setSelectedPlot(plotSrc)}
-                      />
-                      <div className="plot-actions">
-                        <button
-                          className="tool-button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const link = document.createElement("a");
-                            link.href = plotSrc;
-                            link.download = `plot-${index + 1}.png`;
-                            link.click();
-                          }}
-                        >
-                          <Download size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
                 {waitingForInput && (
                   <div className="console-input-container">
                     <input

@@ -299,7 +299,7 @@ textarea {
 }
 
 .console-header {
-  padding: var(--space-12) var(--space-16);
+  padding: var(--space-16) var(--space-16);
   background-color: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   display: flex;
@@ -602,6 +602,10 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .console-header {
+    padding: var(--space-6) var(--space-16);
+  }
+
   .console-panel {
     position: relative;
     transform: none;
@@ -829,4 +833,43 @@ textarea {
   .keyboard-shortcuts-section {
     display: none;
   }
+}
+
+.p5-canvas-wrapper {
+  position: relative;
+  width: 100%;
+  margin: var(--space-16) 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.p5-canvas-container {
+  width: 100%;
+  min-height: 420px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.p5-canvas-container > canvas {
+  pointer-events: auto !important;
+  touch-action: none !important;
+}
+
+.toolbar,
+.console-header,
+.editor-tools,
+.console-input-container,
+.button,
+.button-icon,
+.tool-button,
+select,
+input,
+.attribution {
+  pointer-events: auto !important;
+  z-index: 10;
 }
