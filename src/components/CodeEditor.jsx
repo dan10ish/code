@@ -248,7 +248,7 @@ const CodeEditor = () => {
 
         {language === "p5js" && (
           <div className="p5-canvas-wrapper">
-            <div className="p5-status">Running sketch...</div>
+            {isRunning && <div className="p5-status">Running sketch</div>}
             <div id="p5-canvas-container" className="p5-canvas-container" />
           </div>
         )}
@@ -614,14 +614,6 @@ const CodeEditor = () => {
               </div>
               <div className="console-content">
                 {renderOutput()}
-                {(isRunning || isStopping) && (
-                  <div className="console-loading">
-                    <Loader2 className="spinner" size={24} />
-                    <span>
-                      {isStopping ? "Stopping code..." : "Running code..."}
-                    </span>
-                  </div>
-                )}
                 {waitingForInput && (
                   <div className="console-input-container">
                     <input

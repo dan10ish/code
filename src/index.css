@@ -873,3 +873,21 @@ input,
   pointer-events: auto !important;
   z-index: 10;
 }
+
+.p5-status {
+  background-color: var(--bg-tertiary);
+  color: var(--cyan);
+  padding: 6px 12px;
+  margin-bottom: 20px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
