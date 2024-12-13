@@ -536,27 +536,18 @@ const CodeEditor = () => {
     <>
       <div className="editor-container">
         <div className="toolbar">
-          <div className="toolbar-group">
-            <select
-              className="language-select"
-              value={language}
-              onChange={handleLanguageChange}
-            >
-              {Object.entries(LANGUAGES).map(([key, lang]) => (
-                <option key={key} value={key}>
-                  {lang.name}
-                </option>
-              ))}
-            </select>
-
-            <button
-              className="button-icon"
-              onClick={() => setShowConsole(!showConsole)}
-            >
-              <Terminal size={20} />
-            </button>
-          </div>
-          <div className="toolbar-group">
+          <select
+            className="language-select"
+            value={language}
+            onChange={handleLanguageChange}
+          >
+            {Object.entries(LANGUAGES).map(([key, lang]) => (
+              <option key={key} value={key}>
+                {lang.name}
+              </option>
+            ))}
+          </select>
+          <div className="toolbar-group" style={{ marginLeft: "auto" }}>
             <a
               href="https://github.com/dan10ish/code"
               target="_blank"
@@ -567,6 +558,12 @@ const CodeEditor = () => {
             </a>
             <button className="button-icon" onClick={() => setShowInfo(true)}>
               <InfoIcon />
+            </button>
+            <button
+              className="button-icon"
+              onClick={() => setShowConsole(!showConsole)}
+            >
+              <Terminal size={20} />
             </button>
             <button
               className={`button ${

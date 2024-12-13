@@ -146,7 +146,7 @@ textarea {
 }
 
 .language-select {
-  width: 140px;
+  width: 132px;
   padding: var(--space-8) var(--space-12);
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
@@ -323,7 +323,7 @@ textarea {
   font-size: var(--font-size-base);
   -webkit-overflow-scrolling: touch;
   background-color: var(--bg-secondary);
-  padding-bottom: 100px;
+  padding-bottom: 20px;
 }
 
 .output-text {
