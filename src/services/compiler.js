@@ -248,28 +248,72 @@ class CompilerService {
 
   async runJavaScript(code, handleInput) {
     try {
-      let output = "",
-        error = "";
+      let output = "";
+      let error = "";
       const sandbox = {
         console: {
-          log: (...args) =>
-            (output +=
-              args
-                .map((arg) =>
-                  typeof arg === "object" ? JSON.stringify(arg) : String(arg),
-                )
-                .join(" ") + "\n"),
-          error: (...args) =>
-            (error +=
-              args
-                .map((arg) =>
-                  typeof arg === "object" ? JSON.stringify(arg) : String(arg),
-                )
-                .join(" ") + "\n"),
-          warn: (...args) => (output += "Warning: " + args.join(" ") + "\n"),
+          log: (...args) => {
+            const formattedOutput = args
+              .map((arg) =>
+                typeof arg === "object"
+                  ? JSON.stringify(arg, null, 2)
+                  : String(arg),
+              )
+              .join(" ");
+            output += formattedOutput + "\n";
+            const consoleContent = document.querySelector(".console-content");
+            if (consoleContent) {
+              const pre = document.createElement("pre");
+              pre.className = "output-text";
+              pre.textContent = formattedOutput;
+              consoleContent.appendChild(pre);
+              consoleContent.scrollTop = consoleContent.scrollHeight;
+            }
+          },
+          error: (...args) => {
+            const formattedError = args
+              .map((arg) =>
+                typeof arg === "object"
+                  ? JSON.stringify(arg, null, 2)
+                  : String(arg),
+              )
+              .join(" ");
+            error += formattedError + "\n";
+            const consoleContent = document.querySelector(".console-content");
+            if (consoleContent) {
+              const pre = document.createElement("pre");
+              pre.className = "error-text";
+              pre.textContent = formattedError;
+              consoleContent.appendChild(pre);
+              consoleContent.scrollTop = consoleContent.scrollHeight;
+            }
+          },
+          warn: (...args) => {
+            const warning = "Warning: " + args.join(" ") + "\n";
+            output += warning;
+            const consoleContent = document.querySelector(".console-content");
+            if (consoleContent) {
+              const pre = document.createElement("pre");
+              pre.className = "output-text";
+              pre.textContent = warning;
+              consoleContent.appendChild(pre);
+              consoleContent.scrollTop = consoleContent.scrollHeight;
+            }
+          },
         },
         prompt: async (text) => await handleInput(text || ""),
-        alert: (msg) => (output += "Alert: " + msg + "\n"),
+        alert: (msg) => {
+          const alertText = "Alert: " + msg + "\n";
+          output += alertText;
+          const consoleContent = document.querySelector(".console-content");
+          if (consoleContent) {
+            const pre = document.createElement("pre");
+            pre.className = "output-text";
+            pre.textContent = alertText;
+            consoleContent.appendChild(pre);
+            consoleContent.scrollTop = consoleContent.scrollHeight;
+          }
+        },
       };
 
       const fn = new Function(

@@ -118,7 +118,7 @@ const InfoModal = ({ isOpen, onClose }) =>
                     </span>
                     <span>{description}</span>
                   </div>
-                ),
+                )
               )}
             </div>
           </div>
@@ -155,7 +155,7 @@ const InfoModal = ({ isOpen, onClose }) =>
                   <span key={feature} className="library-item">
                     {feature}
                   </span>
-                ),
+                )
               )}
             </div>
           </div>
@@ -277,35 +277,6 @@ const CodeEditor = () => {
               </div>
             </div>
           ))}
-
-        {(isRunning || isStopping) && language !== "p5js" && (
-          <div className="console-loading">
-            <Loader2 className="spinner" size={24} />
-            <span>{isStopping ? "Stopping code..." : "Running code..."}</span>
-          </div>
-        )}
-
-        {waitingForInput && (
-          <div className="console-input-container">
-            <input
-              type="text"
-              className="console-input"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder={inputPrompt}
-              autoFocus
-              disabled={isStopping}
-            />
-            <button
-              className="console-input-button"
-              onClick={submitInput}
-              disabled={isStopping}
-            >
-              Enter
-            </button>
-          </div>
-        )}
       </>
     );
   }, [language, outputBuffer, output, isRunning]);
@@ -387,17 +358,18 @@ const CodeEditor = () => {
         setIsStopping(false);
         setOutputBuffer([]);
         setOutput(null);
+        setWaitingForInput(false);
 
         abortControllerRef.current = new AbortController();
 
         try {
+          let result;
           if (language === "p5js") {
             const canvasContainer = document.getElementById(
-              "p5-canvas-container",
+              "p5-canvas-container"
             );
             if (canvasContainer) {
               canvasContainer.innerHTML = "";
-
               const createSketch = (codeString) => {
                 return (p) => {
                   const globalObject = {};
@@ -406,12 +378,12 @@ const CodeEditor = () => {
                   });
 
                   const wrappedCode = `
-                    with (p) {
-                      ${codeString}
-                    }
-                    if (typeof setup !== 'undefined') p.userSetup = setup;
-                    if (typeof draw !== 'undefined') p.userDraw = draw;
-                  `;
+                      with (p) {
+                        ${codeString}
+                      }
+                      if (typeof setup !== 'undefined') p.userSetup = setup;
+                      if (typeof draw !== 'undefined') p.userDraw = draw;
+                    `;
 
                   Function("p", wrappedCode)(p);
 
@@ -429,33 +401,32 @@ const CodeEditor = () => {
 
               window.currentP5Instance = new window.p5(
                 createSketch(code),
-                canvasContainer,
+                canvasContainer
               );
               document.querySelector(
-                "#p5-canvas-container canvas",
+                "#p5-canvas-container canvas"
               ).style.pointerEvents = "none";
             }
           } else {
-            let result;
             switch (language) {
               case "python":
                 result = await compiler.runPython(
                   code,
-                  abortControllerRef.current.signal,
+                  abortControllerRef.current.signal
                 );
                 break;
               case "javascript":
                 result = await compiler.runJavaScript(
                   code,
                   handleInput,
-                  abortControllerRef.current.signal,
+                  abortControllerRef.current.signal
                 );
                 break;
               case "cpp":
                 result = await compiler.runCPP(
                   code,
                   handleInput,
-                  abortControllerRef.current.signal,
+                  abortControllerRef.current.signal
                 );
                 break;
             }
@@ -475,11 +446,13 @@ const CodeEditor = () => {
               ]);
             }
             if (result?.plot) setOutput(result);
-            setIsRunning(false);
           }
         } catch (error) {
-          if (!abortControllerRef.current.signal.aborted) {
+          if (!abortControllerRef.current?.signal.aborted) {
             setOutputBuffer([{ text: error.message, type: "error" }]);
+          }
+        } finally {
+          if (!waitingForInput) {
             setIsRunning(false);
           }
         }
@@ -492,7 +465,7 @@ const CodeEditor = () => {
         executeCode();
       }
     }
-  }, [code, language, handleInput, isRunning, showConsole]);
+  }, [code, language, handleInput, isRunning, showConsole, waitingForInput]);
 
   const handleLanguageChange = (e) => {
     stopCode();
@@ -531,7 +504,7 @@ const CodeEditor = () => {
         editorRef.current?.updateOptions({
           fontSize: Math.max(
             (editorRef.current.getOption("fontSize") || 14) - 1,
-            8,
+            8
           ),
         });
       }
@@ -578,7 +551,9 @@ const CodeEditor = () => {
               <InfoIcon />
             </button>
             <button
-              className={`button ${isRunning || isStopping ? "button-danger" : "button-primary"}`}
+              className={`button ${
+                isRunning || isStopping ? "button-danger" : "button-primary"
+              }`}
               onClick={isRunning ? stopCode : runCode}
               disabled={isStopping}
             >
@@ -614,7 +589,15 @@ const CodeEditor = () => {
               </div>
               <div className="console-content">
                 {renderOutput()}
-                {waitingForInput && (
+                {(isRunning || isStopping) && !waitingForInput && (
+                  <div className="console-loading">
+                    <Loader2 className="spinner" size={24} />
+                    <span>
+                      {isStopping ? "Stopping" : "Running"}
+                    </span>
+                  </div>
+                )}
+                {waitingForInput && !isStopping && (
                   <div className="console-input-container">
                     <input
                       type="text"
