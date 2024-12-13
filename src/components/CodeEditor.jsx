@@ -9,6 +9,7 @@ import {
   Github,
   Keyboard,
   Command,
+  Maximize2,
 } from "lucide-react";
 import { compiler } from "../services/compiler";
 import EditorContainer from "./EditorContainer";
@@ -94,7 +95,10 @@ const InfoModal = ({ isOpen, onClose }) =>
   !isOpen ? null : (
     <div className="plot-modal" onClick={onClose}>
       <div className="plot-modal-content" onClick={(e) => e.stopPropagation()}>
-        <button className="plot-modal-close modal-close" onClick={onClose}>
+        <button
+          className="plot-modal-close modal-close console-close"
+          onClick={onClose}
+        >
           <X size={18} />
         </button>
         <div className="info-content">
@@ -118,7 +122,7 @@ const InfoModal = ({ isOpen, onClose }) =>
                     </span>
                     <span>{description}</span>
                   </div>
-                )
+                ),
               )}
             </div>
           </div>
@@ -155,7 +159,7 @@ const InfoModal = ({ isOpen, onClose }) =>
                   <span key={feature} className="library-item">
                     {feature}
                   </span>
-                )
+                ),
               )}
             </div>
           </div>
@@ -249,19 +253,33 @@ const CodeEditor = () => {
         {language === "p5js" && (
           <div className="p5-canvas-wrapper">
             {isRunning && <div className="p5-status">Running sketch</div>}
-            <div id="p5-canvas-container" className="p5-canvas-container" />
+            <div className="p5-canvas-container">
+              <div id="p5-canvas-container" />
+              {isRunning && (
+                <div className="canvas-actions">
+                  <button
+                    className="tool-button"
+                    onClick={() => setSelectedPlot("p5-canvas")}
+                  >
+                    <Maximize2 size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {output?.plot &&
           output.plot.map((plotSrc, index) => (
             <div key={index} className="plot-container">
-              <img
-                src={plotSrc}
-                alt={`Plot ${index + 1}`}
-                onClick={() => setSelectedPlot(plotSrc)}
-              />
+              <img src={plotSrc} alt={`Plot ${index + 1}`} />
               <div className="plot-actions">
+                <button
+                  className="tool-button"
+                  onClick={() => setSelectedPlot(plotSrc)}
+                >
+                  <Maximize2 size={16} />
+                </button>
                 <button
                   className="tool-button"
                   onClick={(e) => {
@@ -366,7 +384,7 @@ const CodeEditor = () => {
           let result;
           if (language === "p5js") {
             const canvasContainer = document.getElementById(
-              "p5-canvas-container"
+              "p5-canvas-container",
             );
             if (canvasContainer) {
               canvasContainer.innerHTML = "";
@@ -401,10 +419,10 @@ const CodeEditor = () => {
 
               window.currentP5Instance = new window.p5(
                 createSketch(code),
-                canvasContainer
+                canvasContainer,
               );
               document.querySelector(
-                "#p5-canvas-container canvas"
+                "#p5-canvas-container canvas",
               ).style.pointerEvents = "none";
             }
           } else {
@@ -412,21 +430,21 @@ const CodeEditor = () => {
               case "python":
                 result = await compiler.runPython(
                   code,
-                  abortControllerRef.current.signal
+                  abortControllerRef.current.signal,
                 );
                 break;
               case "javascript":
                 result = await compiler.runJavaScript(
                   code,
                   handleInput,
-                  abortControllerRef.current.signal
+                  abortControllerRef.current.signal,
                 );
                 break;
               case "cpp":
                 result = await compiler.runCPP(
                   code,
                   handleInput,
-                  abortControllerRef.current.signal
+                  abortControllerRef.current.signal,
                 );
                 break;
             }
@@ -504,7 +522,7 @@ const CodeEditor = () => {
         editorRef.current?.updateOptions({
           fontSize: Math.max(
             (editorRef.current.getOption("fontSize") || 14) - 1,
-            8
+            8,
           ),
         });
       }
@@ -592,9 +610,7 @@ const CodeEditor = () => {
                 {(isRunning || isStopping) && !waitingForInput && (
                   <div className="console-loading">
                     <Loader2 className="spinner" size={24} />
-                    <span>
-                      {isStopping ? "Stopping" : "Running"}
-                    </span>
+                    <span>{isStopping ? "Stopping" : "Running"}</span>
                   </div>
                 )}
                 {waitingForInput && !isStopping && (

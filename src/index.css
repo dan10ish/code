@@ -43,7 +43,7 @@
   --radius-lg: 16px;
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.6);
-  --transition-all: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-all: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -146,7 +146,7 @@ textarea {
 }
 
 .language-select {
-  width: 130px;
+  width: 140px;
   padding: var(--space-8) var(--space-12);
   background-color: var(--bg-tertiary);
   color: var(--text-primary);
@@ -290,7 +290,7 @@ textarea {
   flex-direction: column;
   z-index: 99;
   transform: translateX(100%);
-  transition: transform 0.3s ease;
+  transition: transform 0.1s ease;
   overflow-y: scroll;
 }
 
@@ -359,10 +359,10 @@ textarea {
   border-radius: var(--radius-md);
   padding: var(--space-12);
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: 14px;
   min-height: 44px;
   line-height: 1.5;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.1s ease;
 }
 
 .console-input:focus {
@@ -386,6 +386,7 @@ textarea {
   font-size: var(--font-size-base);
   min-height: 44px;
   min-width: 80px;
+  font-size: 14px;
   transition: var(--transition-all);
 }
 
@@ -410,6 +411,7 @@ textarea {
   border-radius: var(--radius-md);
   display: block;
   transition: var(--transition-all);
+  cursor: default;
 }
 
 .plot-modal {
@@ -473,6 +475,10 @@ textarea {
   padding: var(--space-16);
 }
 
+.console-close {
+  top: -10px;
+}
+
 .info-title {
   font-size: var(--font-size-lg);
   font-weight: 600;
@@ -504,7 +510,7 @@ textarea {
   padding: 4px 8px;
   border-radius: var(--radius-sm);
   font-family: "Fira Code", monospace;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .info-footer {
@@ -645,7 +651,7 @@ textarea {
     pointer-events: none;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.2s ease;
+    transition: all 0.1s ease;
     z-index: 100;
   }
 
@@ -681,8 +687,14 @@ textarea {
 
 @media (hover: hover) and (pointer: fine) {
   .tool-button:hover {
-    background-color: var(--bg-tertiary);
+    background-color: var(--blue);
     color: #ffffff;
+  }
+
+  .tool-button:disabled:hover {
+    background-color: var(--bg-tertiary);
+    pointer-events: none;
+    color: var(--text-secondary);
   }
 
   .tool-button:hover .tool-tooltip {
@@ -700,8 +712,7 @@ textarea {
   }
 
   .plot-container img:hover {
-    transform: scale(1.01);
-    box-shadow: var(--shadow-sm);
+    cursor: not-allowed;
   }
 
   .attribution-color:hover {
@@ -733,8 +744,7 @@ textarea {
   }
 
   .plot-actions button:hover {
-    transform: scale(1.05);
-    background-color: var(--bg-secondary);
+    background-color: var(--blue);
   }
 
   .language-select,
@@ -874,7 +884,7 @@ input,
   z-index: 10;
 }
 
-.p5-status {
+.console-loading {
   background-color: var(--bg-tertiary);
   color: var(--cyan);
   padding: 6px 12px;
