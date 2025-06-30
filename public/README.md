@@ -1,11 +1,11 @@
 # Interactive Code Editor 🚀
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://code.danish.bio)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://dan10ish.github.io/code)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/dan10ish/code)
 
 A modern, feature-rich online code editor that supports Python, JavaScript, and C++ with real-time output, data visualization, and interactive input capabilities.
 
-Play around with it [here](https://code.danish.bio).
+Play around with it [here](https://dan10ish.github.io/code).
 
 ## ✨ Features
 
@@ -138,4 +138,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ⭐️ Star this repo if you find it helpful!
 
-[Live Demo](https://code.danish.bio) • [Report Bug](https://github.com/dan10ish/code/issues) • [Request Feature](https://github.com/dan10ish/code/issues)
+[Live Demo](https://dan10ish.github.io/code) • [Report Bug](https://github.com/dan10ish/code/issues) • [Request Feature](https://github.com/dan10ish/code/issues)

@@ -2,14 +2,14 @@
   "name": "Code - Interactive Online Code Editor",
   "short_name": "Code",
   "description": "Interactive online code editor with Python, JavaScript, and C++ support",
-  "start_url": "/",
+  "start_url": "/code/",
   "display": "standalone",
   "background_color": "#111111",
   "theme_color": "#111111",
   "categories": ["development", "programming", "education"],
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "./icon.png",
       "sizes": "400x400",
       "type": "image/png",
       "purpose": "any maskable"
@@ -18,17 +18,17 @@
   "shortcuts": [
     {
       "name": "Python Editor",
-      "url": "/?lang=python",
+      "url": "/code/?lang=python",
       "description": "Open Python Editor"
     },
     {
       "name": "JavaScript Editor",
-      "url": "/?lang=javascript",
+      "url": "/code/?lang=javascript",
       "description": "Open JavaScript Editor"
     },
     {
       "name": "C++ Editor",
-      "url": "/?lang=cpp",
+      "url": "/code/?lang=cpp",
       "description": "Open C++ Editor"
     }
   ]
